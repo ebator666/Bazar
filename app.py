@@ -1,14 +1,15 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from database import register_user, login_user
+from database import register_user, login_user, save_session, get_user_token, create_db
 import hashlib
 import secrets
 import datetime
-import sqlite3
 
 app = Flask(__name__)
 CORS(app)
 
+#создаем бд
+create_db()
 # Главная страница - перенаправляем на регистрацию
 @app.route('/')
 def index():
@@ -63,60 +64,34 @@ def register():
         result = register_user(username, email, password, "пусто")
         
         if result:
-            # Получаем ID нового пользователя
-            conn = sqlite3.connect('test.db')
-            cur = conn.cursor()
-            cur.execute("SELECT user_id FROM users WHERE email = ?", (email,))
-            user_id = cur.fetchone()[0]
+            #получаем айди из бд
+            user_id = login_user(email, password)
             
-            # Создаем токен
-            token = hashlib.sha256(f"{user_id}{secrets.token_hex(8)}".encode()).hexdigest()
-            
-            # Создаем таблицу сессий если ее нет
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS sessions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    token TEXT UNIQUE NOT NULL,
-                    expires_at TIMESTAMP NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users (user_id)
-                )
-            """)
-            
-            # Устанавливаем срок действия (30 дней)
-            expires = datetime.datetime.now() + datetime.timedelta(days=30)
-            
-            # Удаляем старые сессии этого пользователя
-            cur.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
-            
-            # Сохраняем новый токен
-            cur.execute(
-                "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)",
-                (user_id, token, expires)
-            )
-            conn.commit()
-            conn.close()
-            
-            return jsonify({
-                'success': True,
-                'message': 'Регистрация успешна!',
-                'user': {
-                    'username': username,
-                    'email': email
-                },
-                'token': token,
-                'user_id': user_id
-            }), 200
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Этот email уже занят или произошла ошибка базы данных'
-            }), 400
+            if user_id:
+                #генерируем токен
+                token = hashlib.sha256(f"{user_id}{secrets.token_hex(8)}".encode()).hexdigest()
+                
+                save_session(user_id, token, 30)
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Регистрация успешна!',
+                    'user_id': user_id,
+                    'token': token,
+                    'user': {
+                        'username': username,
+                        'email': email
+                    }
+                }), 200
         
+        return jsonify({
+            'success': False, 
+            'error': 'Этот email уже занят или произошла ошибка базы данных'
+        }), 400
+
     except Exception as e:
         return jsonify({
-            'success': False,
+            'success': False, 
             'error': str(e)
         }), 500
 
@@ -130,7 +105,7 @@ def login():
         email = data.get('email')
         password = data.get('password')
         remember = data.get('remember') == 'true'
-        
+
         # Валидация на сервере
         if not email or '@' not in email:
             return jsonify({
@@ -148,48 +123,20 @@ def login():
         user_id = login_user(email, password)
         
         if user_id:
+            remember = request.form.get('remember') == 'true'
+            days = 30 if remember else 1
+
             # Создаем токен
             token = hashlib.sha256(f"{user_id}{secrets.token_hex(8)}".encode()).hexdigest()
             
-            # Сохраняем токен в базу данных сессий
-            conn = sqlite3.connect('test.db')
-            cur = conn.cursor()
-            
-            # Создаем таблицу сессий если ее нет
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS sessions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    token TEXT UNIQUE NOT NULL,
-                    expires_at TIMESTAMP NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users (user_id)
-                )
-            """)
-            
-            # Устанавливаем срок действия
-            if remember:
-                expires = datetime.datetime.now() + datetime.timedelta(days=30)
-            else:
-                expires = datetime.datetime.now() + datetime.timedelta(days=1)
-            
-            # Удаляем старые сессии этого пользователя
-            cur.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
-            
-            # Сохраняем новый токен
-            cur.execute(
-                "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)",
-                (user_id, token, expires)
-            )
-            conn.commit()
-            conn.close()
-            
-            return jsonify({
-                'success': True,
-                'message': 'Вход выполнен успешно!',
-                'user_id': user_id,
-                'token': token
-            }), 200
+            # сохраняем сессию
+            if save_session(user_id, token, days):   
+                return jsonify({
+                    'success': True,
+                    'message': 'Вход выполнен успешно!',
+                    'user_id': user_id,
+                    'token': token
+                }), 200
         else:
             return jsonify({
                 'success': False,
@@ -211,36 +158,22 @@ def get_user(user_id):
     if not token:
         return jsonify({'success': False, 'error': 'Токен не предоставлен'}), 401
     
-    # Проверяем токен в базе
-    conn = sqlite3.connect('test.db')
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT user_id FROM sessions WHERE token = ? AND expires_at > ?",
-        (token, datetime.datetime.now())
-    )
-    session = cur.fetchone()
+    #возвращаем жанные пользователя, если токен совпадает и не просрочен
+    user_data = get_user_token(token)
     
-    if not session or session[0] != user_id:
-        conn.close()
-        return jsonify({'success': False, 'error': 'Недействительный токен'}), 401
-    
-    # Получаем данные пользователя
-    cur.execute(
-        "SELECT user_nickname, email FROM users WHERE user_id = ?",
-        (user_id,)
-    )
-    user = cur.fetchone()
-    conn.close()
-    
-    if user:
-        return jsonify({
-            'success': True,
-            'username': user[0],
-            'email': user[1],
-            'user_id': user_id
-        })
-    else:
-        return jsonify({'success': False, 'error': 'Пользователь не найден'}), 404
+    if user_data:
+        # Сравниваем ID из токена (user_data[0]) с ID из URL (user_id)
+        if user_data[0] == user_id:
+            return jsonify({
+                'success': True,
+                'username': user_data[1],
+                'email': user_data[2],
+                'user_id': user_data[0]
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Доступ запрещен'}), 403
+            
+    return jsonify({'success': False, 'error': 'Сессия истекла или неверна'}), 401
 
 # Проверка токена
 @app.route('/check-auth', methods=['GET'])
@@ -250,17 +183,11 @@ def check_auth():
     if not token:
         return jsonify({'authenticated': False}), 401
     
-    conn = sqlite3.connect('test.db')
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT user_id FROM sessions WHERE token = ? AND expires_at > ?",
-        (token, datetime.datetime.now())
-    )
-    session = cur.fetchone()
-    conn.close()
+    #возвращаем данные пользователя, если токен совпадает и не просрочен
+    user_data = get_user_token(token)
     
-    if session:
-        return jsonify({'authenticated': True, 'user_id': session[0]})
+    if user_data:
+        return jsonify({'authenticated': True, 'user_id': user_data[0]}), 200
     else:
         return jsonify({'authenticated': False}), 401
 
