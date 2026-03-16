@@ -1,5 +1,6 @@
 import bcrypt
 import sqlite3 as sq
+import datetime
 
 def create_db():
     with sq.connect("test.db", check_same_thread=False) as con:
@@ -23,6 +24,15 @@ def create_db():
             description TEXT,
             category TEXT NOT NULL,
             FOREIGN KEY (seller_id) REFERENCES users (user_id)
+        )""")
+
+        cur.execute("""CREATE TABLE IF NOT EXISTS sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            token TEXT UNIQUE NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (user_id)
         )""")
 
 def register_user(nickname, email, password, geo):
@@ -72,6 +82,34 @@ def login_user(email, password):
     except sq.Error as e:
         print(f"Ошибка: {e}")
         return False
+
+def save_session(user_id, token, days = 30):
+    try:
+        expires = datetime.datetime.now() + datetime.timedelta(days=30)
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+            cur.execute("INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)",(user_id, token, expires))
+            con.commit()
+            return True
+    except sq.Error as e:
+        print(f"Ошибка сохранения сессии: {e}")
+        return False
+    
+def get_user_token(token):
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("SELECT user_id FROM sessions WHERE token = ? AND expires_at > ?",(token, datetime.datetime.now()))
+            session = cur.fetchone()
+            if session:
+                cur.execute("SELECT user_nickname, email FROM users WHERE user_id = ?", (session[0],))
+                user = cur.fetchone()
+                return (session[0], user[0], user[1])
+            return None
+    except sq.Error:
+        return None
+    
 
 create_db()
 
