@@ -21,8 +21,9 @@ def create_db():
             seller_geolocation TEXT NOT NULL,
             title TEXT NOT NULL,
             price INTEGER NOT NULL,
-            description TEXT,
+            description TEXT NOT NULL,
             category TEXT NOT NULL,
+            image_path TEXT DEFAULT 'default.jpg',
             FOREIGN KEY (seller_id) REFERENCES users (user_id)
         )""")
 
@@ -50,7 +51,8 @@ def register_user(nickname, email, password, geo):
         
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
-            cur = con.cursor()                
+            cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
             hash = bcrypt.gensalt()
             hashed_password = bcrypt.hashpw(password.encode("UTF-8"), hash)
             cur.execute("INSERT INTO users (user_nickname, email, password, user_geolocation) VALUES (?, ?, ?, ?)", (nickname, email, hashed_password, geo))
@@ -65,7 +67,8 @@ def register_user(nickname, email, password, geo):
 def login_user(email, password):
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
-            cur = con.cursor()  
+            cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON") 
             cur.execute("SELECT user_id, password FROM users WHERE email = ?", (email,))
             result = cur.fetchone()
             if result is not None:
@@ -88,6 +91,7 @@ def save_session(user_id, token, days = 30):
         expires = datetime.datetime.now() + datetime.timedelta(days=30)
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
             cur.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
             cur.execute("INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)",(user_id, token, expires))
             con.commit()
@@ -100,6 +104,7 @@ def get_user_token(token):
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
             cur.execute("SELECT user_id FROM sessions WHERE token = ? AND expires_at > ?",(token, datetime.datetime.now()))
             session = cur.fetchone()
             if session:
@@ -109,12 +114,115 @@ def get_user_token(token):
             return None
     except sq.Error:
         return None
+
+def create_ad(seller_id, seller_geolocation, title, price, description, category, image_path="default.jpg"):
+    if not title or len(title) < 3 or len(title) > 50:
+        print("Ошибка: название товара должно быть от 3 до 50 символов")
+        return False
     
+    if price < 0:
+        print("Ошибка: цена не может быть отрицательной")
+        return False
+    
+    if len(description) < 10:
+        print("Ошибка: описание слишком короткое")
+        return False
 
-create_db()
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
+            cur.execute("INSERT INTO ads (seller_id, seller_geolocation, title, price, description, category, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+            (seller_id, seller_geolocation, title, price, description, category, image_path))
+            con.commit()
+            
+            print(f"Объявление '{title}' успешно создано.")
+            return True
+            
+    except sq.Error as e:
+        print(f"Ошибка базы данных: {e}")
+        return False 
 
+def delete_ad(ad_id, user_id):
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
+            cur.execute("DELETE FROM ads WHERE ad_id = ? AND seller_id = ?", (ad_id, user_id))
+            con.commit()
+
+            if cur.rowcount > 0:
+                print(f"Объявление {ad_id} удалено владельцем {user_id}")
+                return True
+            else:
+                print(f"Объявление {ad_id} не найдено или доступ запрещен")
+                return False
         
+    except sq.Error as e:
+        print(f"Ошибка при удалении: {e}")
+        return False
 
+def update_ad(ad_id, user_id, title, price, description, category, image_path="default.jpg"):
+    if not title or price < 0 or len(description) < 10:
+        print("Ошибка валидации: проверьте корректность данных")
+        return False
 
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
+            cur.execute("UPDATE ads SET title = ?, price = ?, description = ?, category = ?, image_path = ? WHERE ad_id = ? AND seller_id = ?", 
+            (title, price, description, category, image_path, ad_id, user_id))
+            con.commit()
 
+            if cur.rowcount > 0:
+                print(f"Объявление {ad_id} успешно обновлено")
+                return True
+            else:
+                print("Ошибка: объявление не найдено или у вас нет прав на его редактирование")
+                return False
+                
+    except sq.Error as e:
+        print(f"Ошибка базы данных при обновлении: {e}")
+        return False
 
+def get_user_ads(user_id):
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON") 
+            cur.execute("SELECT * FROM ads WHERE seller_id = ? ORDER BY ad_id DESC", (user_id,))
+            
+            return cur.fetchall() 
+            
+    except sq.Error as e:
+        print(f"Ошибка при получении объявлений: {e}")
+        return []
+
+def get_all_ads():
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
+            cur.execute("SELECT * FROM ads ORDER BY ad_id DESC")
+
+            return cur.fetchall()
+            
+    except sq.Error as e:
+        print(f"Ошибка при получении всех объявлений: {e}")
+        return []
+
+def get_one_ad(ad_id):
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
+            cur.execute("SELECT * FROM ads WHERE ad_id = ?", (ad_id,))
+
+            return cur.fetchone()
+        
+    except sq.Error as e:
+        print(f"Ошибка при получении объявления {ad_id}: {e}")
+        return None
+    
+create_db()
