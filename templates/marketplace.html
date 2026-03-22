@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bazar - Все объявления</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            height: 70px;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: black;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: black;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-outline {
+            padding: 8px 20px;
+            background: transparent;
+            border: 1px solid black;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: black;
+        }
+
+        .btn-outline:hover {
+            background: black;
+            color: white;
+        }
+
+        .btn-primary {
+            padding: 8px 20px;
+            background: black;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* Main content */
+        .main-container {
+            max-width: 1200px;
+            margin: 90px auto 40px;
+            padding: 0 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        /* Фильтры */
+        .filters {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .category-select {
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* Сетка объявлений */
+        .ads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .ad-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .ad-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .ad-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        .ad-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .ad-card:hover .ad-image img {
+            transform: scale(1.05);
+        }
+
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 48px;
+        }
+
+        .ad-info {
+            padding: 20px;
+        }
+
+        .ad-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .ad-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .ad-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: black;
+            margin: 12px 0;
+        }
+
+        .ad-seller {
+            font-size: 13px;
+            color: #999;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .top-header {
+                padding: 0 20px;
+            }
+            
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .ads-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .search-input, .category-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="top-header">
+            <a href="/" class="logo">Bazar</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <div id="authSection">
+                    <div class="auth-buttons">
+                        <a href="/signin" class="btn-outline">Войти</a>
+                        <a href="/signup" class="btn-primary">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="hero">
+            <h1>📦 Доска объявлений</h1>
+            <p>Находите товары и услуги от пользователей Bazar</p>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию...">
+            <select id="categoryFilter" class="category-select">
+                <option value="">Все категории</option>
+                <option value="Электроника">📱 Электроника</option>
+                <option value="Одежда">👕 Одежда</option>
+                <option value="Недвижимость">🏠 Недвижимость</option>
+                <option value="Авто">🚗 Авто</option>
+                <option value="Услуги">💼 Услуги</option>
+                <option value="Другое">📦 Другое</option>
+            </select>
+        </div>
+
+        <div id="adsContainer" class="ads-grid">
+            <div class="empty-state">
+                <p>⏳ Загрузка объявлений...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allAds = [];
+
+        // Загрузка всех объявлений
+        async function loadAds() {
+            try {
+                const response = await fetch('http://localhost:5000/api/all-ads');
+                const data = await response.json();
+
+                if (data.success) {
+                    allAds = data.ads;
+                    renderAds();
+                } else {
+                    document.getElementById('adsContainer').innerHTML = `
+                        <div class="empty-state">
+                            <p>❌ Ошибка загрузки объявлений</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('adsContainer').innerHTML = `
+                    <div class="empty-state">
+                        <p>❌ Ошибка соединения с сервером</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Рендер объявлений с фильтрацией
+        function renderAds() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+
+            let filteredAds = allAds;
+
+            if (searchTerm) {
+                filteredAds = filteredAds.filter(ad => 
+                    ad.title.toLowerCase().includes(searchTerm) ||
+                    ad.description.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (category) {
+                filteredAds = filteredAds.filter(ad => ad.category === category);
+            }
+
+            const container = document.getElementById('adsContainer');
+
+            if (filteredAds.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>📭 Объявления не найдены</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredAds.map(ad => `
+                <a href="/ad/${ad.id}" class="ad-card">
+                    <div class="ad-image">
+                        ${ad.first_photo ? 
+                            `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">` : 
+                            `<div class="no-image">📷</div>`
+                        }
+                    </div>
+                    <div class="ad-info">
+                        <span class="ad-category">${escapeHtml(ad.category)}</span>
+                        <h3 class="ad-title">${escapeHtml(ad.title)}</h3>
+                        <div class="ad-price">${formatPrice(ad.price)} ₽</div>
+                        <div class="ad-seller">👤 ${escapeHtml(ad.seller_name)}</div>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('ru-RU').format(price);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Проверка авторизации для отображения меню
+        async function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            const authSection = document.getElementById('authSection');
+            
+            if (token) {
+                try {
+                    const response = await fetch('http://localhost:5000/check-auth', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.authenticated) {
+                        // Пользователь авторизован
+                        authSection.innerHTML = `
+                            <div class="user-menu">
+                                <span class="user-name" id="userName">Загрузка...</span>
+                                <a href="/dashboard" class="btn-primary">Мои объявления</a>
+                                <button onclick="logout()" class="btn-outline">Выйти</button>
+                            </div>
+                        `;
+                        loadUserName(data.user_id);
+                        return;
+                    }
+                } catch (e) {
+                    console.log('Не авторизован');
+                }
+            }
+            
+            // Не авторизован
+            authSection.innerHTML = `
+                <div class="auth-buttons">
+                    <a href="/signin" class="btn-outline">Войти</a>
+                    <a href="/signup" class="btn-primary">Регистрация</a>
+                </div>
+            `;
+        }
+
+        async function loadUserName(userId) {
+            const token = localStorage.getItem('auth_token');
+            try {
+                const response = await fetch(`http://localhost:5000/user/${userId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('userName').textContent = data.username;
+                }
+            } catch (e) {
+                console.log('Ошибка загрузки имени');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/';
+        }
+
+        // Слушатели событий
+        document.getElementById('searchInput').addEventListener('input', renderAds);
+        document.getElementById('categoryFilter').addEventListener('change', renderAds);
+
+        // Загрузка
+        loadAds();
+        checkAuth();
+    </script>
+</body>
+</html>

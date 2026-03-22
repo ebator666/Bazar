@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Bazar - Объявление</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            height: 70px;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: black;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: black;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-outline {
+            padding: 8px 20px;
+            background: transparent;
+            border: 1px solid black;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: black;
+        }
+
+        .btn-primary {
+            padding: 8px 20px;
+            background: black;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Main content */
+        .main-container {
+            max-width: 1200px;
+            margin: 90px auto 40px;
+            padding: 0 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: black;
+        }
+
+        .ad-detail {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        /* Галерея */
+        .gallery-section {
+            background: #fafafa;
+            padding: 20px;
+        }
+
+        .main-photo {
+            width: 100%;
+            height: 400px;
+            background: #f0f0f0;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: white;
+        }
+
+        .thumbnails {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .thumbnail.active {
+            border-color: black;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Информация */
+        .info-section {
+            padding: 30px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .ad-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+
+        .ad-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        .ad-description {
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .seller-info {
+            background: #f9f9f9;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .seller-info h3 {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .seller-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .seller-contact {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .ad-date {
+            color: #999;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 20px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 20px;
+            color: #e53e3e;
+        }
+
+        @media (max-width: 768px) {
+            .top-header {
+                padding: 0 20px;
+            }
+            
+            .ad-detail {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-photo {
+                height: 300px;
+            }
+            
+            .ad-title {
+                font-size: 24px;
+            }
+            
+            .ad-price {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="top-header">
+            <a href="/" class="logo">Bazar</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <div id="authSection">
+                    <div class="auth-buttons">
+                        <a href="/signin" class="btn-outline">Войти</a>
+                        <a href="/signup" class="btn-primary">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <a href="/" class="back-link">← Назад к объявлениям</a>
+        
+        <div id="adContent">
+            <div class="loading">⏳ Загрузка объявления...</div>
+        </div>
+    </div>
+
+    <script>
+        // Получаем ad_id из URL (более надежный способ)
+        function getAdIdFromUrl() {
+            const path = window.location.pathname;
+            const parts = path.split('/');
+            return parseInt(parts[parts.length - 1]);
+        }
+        
+        const adId = getAdIdFromUrl();
+        
+        async function loadAdDetail() {
+            try {
+                const response = await fetch(`http://localhost:5000/api/ad/${adId}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    document.getElementById('adContent').innerHTML = `
+                        <div class="error">
+                            <p>❌ ${data.error || 'Объявление не найдено'}</p>
+                            <a href="/" style="color: black; margin-top: 20px; display: inline-block;">Вернуться на главную</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const ad = data.ad;
+                document.title = `${ad.title} | Bazar`;
+                
+                // Рендер галереи
+                let galleryHtml = '';
+                let mainPhotoHtml = '';
+                
+                if (ad.photos && ad.photos.length > 0) {
+                    mainPhotoHtml = `<img id="mainImage" src="${ad.photos[0].url}" alt="${escapeHtml(ad.title)}">`;
+                    galleryHtml = ad.photos.map((photo, index) => `
+                        <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changePhoto('${photo.url}', ${index})">
+                            <img src="${photo.url}" alt="Фото ${index + 1}">
+                        </div>
+                    `).join('');
+                } else {
+                    mainPhotoHtml = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 48px;">📷</div>`;
+                }
+                
+                const html = `
+                    <div class="ad-detail">
+                        <div class="gallery-section">
+                            <div class="main-photo">
+                                ${mainPhotoHtml}
+                            </div>
+                            ${ad.photos && ad.photos.length > 1 ? `
+                                <div class="thumbnails">
+                                    ${galleryHtml}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="info-section">
+                            <span class="category-badge">${escapeHtml(ad.category)}</span>
+                            <h1 class="ad-title">${escapeHtml(ad.title)}</h1>
+                            <div class="ad-price">${formatPrice(ad.price)} ₽</div>
+                            <div class="ad-description">${escapeHtml(ad.description || 'Нет описания')}</div>
+                            
+                            <div class="seller-info">
+                                <h3>📢 Продавец</h3>
+                                <div class="seller-name">${escapeHtml(ad.seller_name)}</div>
+                                <div class="seller-contact">
+                                    📧 ${escapeHtml(ad.seller_email)}<br>
+                                    📍 ${escapeHtml(ad.seller_geolocation || 'Не указано')}
+                                </div>
+                            </div>
+                            
+                            <div class="ad-date">
+                                📅 Опубликовано: ${formatDate(ad.created_at)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('adContent').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('adContent').innerHTML = `
+                    <div class="error">
+                        <p>❌ Ошибка загрузки объявления</p>
+                        <a href="/" style="color: black; margin-top: 20px; display: inline-block;">Вернуться на главную</a>
+                    </div>
+                `;
+            }
+        }
+        
+        // Глобальная функция для смены фото
+        window.changePhoto = function(url, index) {
+            const mainImage = document.getElementById('mainImage');
+            if (mainImage) {
+                mainImage.src = url;
+            }
+            
+            // Обновляем активный класс у миниатюр
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumb, i) => {
+                if (i === index) {
+                    thumb.classList.add('active');
+                } else {
+                    thumb.classList.remove('active');
+                }
+            });
+        };
+        
+        function formatPrice(price) {
+            return new Intl.NumberFormat('ru-RU').format(price);
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Недавно';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('ru-RU', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        async function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            const authSection = document.getElementById('authSection');
+            
+            if (token) {
+                try {
+                    const response = await fetch('http://localhost:5000/check-auth', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.authenticated) {
+                        authSection.innerHTML = `
+                            <div class="user-menu">
+                                <a href="/dashboard" class="btn-primary">Мои объявления</a>
+                                <button onclick="logout()" class="btn-outline">Выйти</button>
+                            </div>
+                        `;
+                        return;
+                    }
+                } catch (e) {
+                    console.log('Ошибка проверки авторизации');
+                }
+            }
+            
+            authSection.innerHTML = `
+                <div class="auth-buttons">
+                    <a href="/signin" class="btn-outline">Войти</a>
+                    <a href="/signup" class="btn-primary">Регистрация</a>
+                </div>
+            `;
+        }
+        
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/';
+        }
+        
+        // Загружаем данные при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAdDetail();
+            checkAuth();
+        });
+    </script>
+</body>
+</html>
