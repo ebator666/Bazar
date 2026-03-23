@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,7 @@
             height: 70px;
             border-bottom: 1px solid #e5e5e5;
             z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .logo {
@@ -170,7 +171,7 @@
             background: white;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: all 0.2s;
             cursor: pointer;
             text-decoration: none;
@@ -180,7 +181,7 @@
 
         .ad-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .ad-image {
@@ -264,25 +265,27 @@
             .top-header {
                 padding: 0 20px;
             }
-            
+
             .hero h1 {
                 font-size: 28px;
             }
-            
+
             .ads-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .filters {
                 flex-direction: column;
             }
-            
-            .search-input, .category-select {
+
+            .search-input,
+            .category-select {
                 width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="top-header">
@@ -290,10 +293,11 @@
             <div class="nav-links">
                 <a href="/marketplace">Главная</a>
                 <div id="authSection">
-                    <div class="auth-buttons">
-                        <a href="/signin" class="btn-outline">Войти</a>
-                        <a href="/" class="btn-primary">Регистрация</a>
-                    </div>
+                    <div class="user-menu">
+                    <span class="user-name" id="userName">Загрузка...</span>
+                    <a href="/dashboard" class="btn-primary">Мои объявления</a>
+                    <button onclick="logout()" class="btn-outline">Выйти</button>
+                </div>
                 </div>
             </div>
         </div>
@@ -324,6 +328,7 @@
             </div>
         </div>
     </div>
+    
 
     <script>
         let allAds = [];
@@ -337,7 +342,8 @@
                 if (data.success) {
                     allAds = data.ads;
                     renderAds();
-                } else {
+                }
+                else {
                     document.getElementById('adsContainer').innerHTML = `
                         <div class="empty-state">
                             <p>❌ Ошибка загрузки объявлений</p>
@@ -362,7 +368,7 @@
             let filteredAds = allAds;
 
             if (searchTerm) {
-                filteredAds = filteredAds.filter(ad => 
+                filteredAds = filteredAds.filter(ad =>
                     ad.title.toLowerCase().includes(searchTerm) ||
                     ad.description.toLowerCase().includes(searchTerm)
                 );
@@ -386,10 +392,10 @@
             container.innerHTML = filteredAds.map(ad => `
                 <a href="/ad/${ad.id}" class="ad-card">
                     <div class="ad-image">
-                        ${ad.first_photo ? 
-                            `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">` : 
-                            `<div class="no-image">📷</div>`
-                        }
+                        ${ad.first_photo ?
+                    `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">` :
+                    `<div class="no-image">📷</div>`
+                }
                     </div>
                     <div class="ad-info">
                         <span class="ad-category">${escapeHtml(ad.category)}</span>
@@ -416,23 +422,15 @@
         async function checkAuth() {
             const token = localStorage.getItem('auth_token');
             const authSection = document.getElementById('authSection');
-            
+
             if (token) {
                 try {
                     const response = await fetch('/check-auth', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     const data = await response.json();
-                    
+
                     if (data.authenticated) {
-                        // Пользователь авторизован
-                        authSection.innerHTML = `
-                            <div class="user-menu">
-                                <span class="user-name" id="userName">Загрузка...</span>
-                                <a href="/dashboard" class="btn-primary">Мои объявления</a>
-                                <button onclick="logout()" class="btn-outline">Выйти</button>
-                            </div>
-                        `;
                         loadUserName(data.user_id);
                         return;
                     }
@@ -440,14 +438,10 @@
                     console.log('Не авторизован');
                 }
             }
-            
-            // Не авторизован
-            authSection.innerHTML = `
-                <div class="auth-buttons">
-                    <a href="/signin" class="btn-outline">Войти</a>
-                    <a href="/" class="btn-primary">Регистрация</a>
-                </div>
-            `;
+            if (!token) {
+                window.location.href = '/signin';
+                return false;
+            }
         }
 
         async function loadUserName(userId) {
@@ -479,4 +473,5 @@
         checkAuth();
     </script>
 </body>
+
 </html>
