@@ -13,7 +13,7 @@ import uuid
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins='*', supports_credentials=True)
 
 # Настройки загрузки фото
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
@@ -29,11 +29,11 @@ create_db()
 
 @app.route('/')
 def index():
-    return render_template('marketplace.html')
-
-@app.route('/signup')
-def signup_page():
     return render_template('signup.html')
+
+@app.route('/marketplace')
+def signup_page():
+    return render_template('marketplace.html')
 
 @app.route('/signin')
 def signin_page():
@@ -380,4 +380,4 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', debug=True, port=5000)

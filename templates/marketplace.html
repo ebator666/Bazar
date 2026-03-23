@@ -286,13 +286,13 @@
 <body>
     <header>
         <div class="top-header">
-            <a href="/" class="logo">Bazar</a>
+            <a href="/marketplace" class="logo">Bazar</a>
             <div class="nav-links">
-                <a href="/">Главная</a>
+                <a href="/marketplace">Главная</a>
                 <div id="authSection">
                     <div class="auth-buttons">
                         <a href="/signin" class="btn-outline">Войти</a>
-                        <a href="/signup" class="btn-primary">Регистрация</a>
+                        <a href="/" class="btn-primary">Регистрация</a>
                     </div>
                 </div>
             </div>
@@ -331,7 +331,7 @@
         // Загрузка всех объявлений
         async function loadAds() {
             try {
-                const response = await fetch('http://localhost:5000/api/all-ads');
+                const response = await fetch('/api/all-ads');
                 const data = await response.json();
 
                 if (data.success) {
@@ -419,7 +419,7 @@
             
             if (token) {
                 try {
-                    const response = await fetch('http://localhost:5000/check-auth', {
+                    const response = await fetch('/check-auth', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     const data = await response.json();
@@ -445,7 +445,7 @@
             authSection.innerHTML = `
                 <div class="auth-buttons">
                     <a href="/signin" class="btn-outline">Войти</a>
-                    <a href="/signup" class="btn-primary">Регистрация</a>
+                    <a href="/" class="btn-primary">Регистрация</a>
                 </div>
             `;
         }
@@ -453,7 +453,7 @@
         async function loadUserName(userId) {
             const token = localStorage.getItem('auth_token');
             try {
-                const response = await fetch(`http://localhost:5000/user/${userId}`, {
+                const response = await fetch(`/user/${userId}`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();

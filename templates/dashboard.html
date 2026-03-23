@@ -610,7 +610,7 @@
         <div class="top-header">
             <a href="/" class="logo">Bazar</a>
             <div class="nav-links">
-                <a href="/" class="active">📱 Все объявления</a>
+                <a href="/marketplace" class="active">📱 Все объявления</a>
                 <a href="/dashboard">📦 Мои объявления</a>
             </div>
             <div class="header-actions">
@@ -707,7 +707,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:5000/check-auth', {
+                const response = await fetch('/check-auth', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
@@ -730,7 +730,7 @@
 
         async function loadUserData(userId) {
             try {
-                const response = await fetch(`http://localhost:5000/user/${userId}`, {
+                const response = await fetch(`/user/${userId}`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
@@ -768,7 +768,7 @@
         // Загрузка объявлений пользователя
         async function loadAds() {
             try {
-                const response = await fetch('http://localhost:5000/api/ads', {
+                const response = await fetch('/api/ads', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
@@ -814,7 +814,7 @@
         // Создание объявления
         async function createAd(formData) {
             try {
-                const response = await fetch('http://localhost:5000/api/ads', {
+                const response = await fetch('/api/ads', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -837,7 +837,7 @@
         // Обновление объявления
         async function updateAd(adId, formData) {
             try {
-                const response = await fetch(`http://localhost:5000/api/ads/${adId}`, {
+                const response = await fetch(`/api/ads/${adId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': 'Bearer ' + token,
@@ -865,7 +865,7 @@
             if (!confirm('Вы уверены, что хотите удалить это объявление?')) return;
 
             try {
-                const response = await fetch(`http://localhost:5000/api/ads/${adId}`, {
+                const response = await fetch(`/api/ads/${adId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
