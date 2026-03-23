@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,7 @@
             height: 70px;
             border-bottom: 1px solid #e5e5e5;
             z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .logo {
@@ -139,7 +140,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -312,7 +313,7 @@
             background: white;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: all 0.2s;
             border: 1px solid #eee;
             cursor: pointer;
@@ -320,7 +321,7 @@
 
         .ad-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .ad-image {
@@ -404,7 +405,8 @@
             padding-top: 16px;
         }
 
-        .edit-btn, .delete-btn {
+        .edit-btn,
+        .delete-btn {
             padding: 8px 16px;
             border-radius: 8px;
             font-size: 14px;
@@ -483,11 +485,104 @@
             display: none;
         }
 
+        .photo-limit-info {
+            font-size: 12px;
+            color: #667eea;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .photo-limit-warning {
+            font-size: 12px;
+            color: #e53e3e;
+            margin-top: 8px;
+            text-align: center;
+            background: #fed7d7;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .message.warning {
+            background: #feebc8;
+            color: #9b2c1d;
+        }
+
+        /* Добавьте в стили */
+        .photo-limit-info {
+            font-size: 12px;
+            color: #667eea;
+            margin-top: 8px;
+            text-align: center;
+            padding: 5px;
+            background: #ebf4ff;
+            border-radius: 6px;
+        }
+
+        .photo-limit-warning {
+            font-size: 12px;
+            color: #e53e3e;
+            margin-top: 8px;
+            text-align: center;
+            background: #fed7d7;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .message.warning {
+            background: #feebc8;
+            color: #9b2c1d;
+        }
+
+        .existing-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        .existing-photo-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+
+        .existing-photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .delete-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: #e53e3e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+        }
+
+        .delete-photo:hover {
+            background: #c53030;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -502,7 +597,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 2000;
             justify-content: center;
             align-items: center;
@@ -535,11 +630,12 @@
             cursor: pointer;
         }
 
-        .gallery-prev, .gallery-next {
+        .gallery-prev,
+        .gallery-next {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             color: white;
             border: none;
             width: 50px;
@@ -550,8 +646,9 @@
             transition: all 0.2s;
         }
 
-        .gallery-prev:hover, .gallery-next:hover {
-            background: rgba(0,0,0,0.8);
+        .gallery-prev:hover,
+        .gallery-next:hover {
+            background: rgba(0, 0, 0, 0.8);
         }
 
         .gallery-prev {
@@ -572,43 +669,84 @@
             font-size: 14px;
         }
 
+        .existing-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .existing-photo-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+
+        .existing-photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .existing-photo-item .delete-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: #e53e3e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+        }
+
         @media (max-width: 768px) {
             .top-header {
                 padding: 0 20px;
             }
-            
+
             .page-header h1 {
                 font-size: 24px;
             }
-            
+
             .ads-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .modal-content {
                 padding: 20px;
             }
-            
-            .gallery-prev, .gallery-next {
+
+            .gallery-prev,
+            .gallery-next {
                 width: 40px;
                 height: 40px;
                 font-size: 18px;
             }
-            
+
             .gallery-prev {
                 left: -50px;
             }
-            
+
             .gallery-next {
                 right: -50px;
             }
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="top-header">
-            <a href="/" class="logo">Bazar</a>
+            <a href="/marketplace" class="logo">Bazar</a>
             <div class="nav-links">
                 <a href="/marketplace" class="active">📱 Все объявления</a>
                 <a href="/dashboard">📦 Мои объявления</a>
@@ -667,7 +805,12 @@
                     <textarea id="description" placeholder="Опишите ваш товар или услугу..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Фотографии (до 5 шт.)</label>
+                    <label>Текущие фотографии</label>
+                    <div id="existingPhotos" class="existing-photos"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Добавить новые фотографии (до 5 шт.)</label>
                     <div class="photo-upload-area" id="photoUploadArea">
                         <span>📸 Нажмите или перетащите фото</span>
                         <input type="file" id="photos" multiple accept="image/*" style="display:none">
@@ -698,6 +841,7 @@
         let currentPhotos = [];
         let galleryPhotos = [];
         let galleryIndex = 0;
+        let existingPhotos = [];
 
         // Проверка авторизации
         async function checkAuth() {
@@ -779,10 +923,10 @@
                     container.innerHTML = data.ads.map(ad => `
                         <div class="ad-card" data-id="${ad.id}">
                             <div class="ad-image" onclick="window.location.href='/ad/${ad.id}'">
-                                ${ad.first_photo ? 
-                                    `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">` : 
-                                    `<div class="no-image">📷</div>`
-                                }
+                                ${ad.first_photo ?
+                            `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">` :
+                            `<div class="no-image">📷</div>`
+                        }
                             </div>
                             <div class="ad-info">
                                 <span class="ad-category">${escapeHtml(ad.category)}</span>
@@ -837,7 +981,8 @@
         // Обновление объявления
         async function updateAd(adId, formData) {
             try {
-                const response = await fetch(`/api/ads/${adId}`, {
+                // Сначала обновляем текстовые данные
+                const response = await fetch(`http://localhost:5000/api/ads/${adId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': 'Bearer ' + token,
@@ -845,15 +990,37 @@
                     },
                     body: JSON.stringify(formData)
                 });
+
                 const result = await response.json();
 
-                if (result.success) {
-                    showMessage('Объявление обновлено!', 'success');
-                    closeModal();
-                    await loadAds();
-                } else {
-                    showMessage(result.error || 'Ошибка при обновлении', 'error');
+                if (!result.success) {
+                    showMessage(result.error, 'error');
+                    return;
                 }
+
+                // Если есть новые фото, загружаем их
+                if (currentPhotos.length > 0) {
+                    const photoFormData = new FormData();
+                    currentPhotos.forEach(file => {
+                        photoFormData.append('photos', file);
+                    });
+
+                    const photoResponse = await fetch(`http://localhost:5000/api/ads/${adId}/photos`, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token },
+                        body: photoFormData
+                    });
+
+                    const photoResult = await photoResponse.json();
+                    if (!photoResult.success) {
+                        showMessage('Объявление обновлено, но фото не загрузились', 'error');
+                    }
+                }
+
+                showMessage('Объявление обновлено!', 'success');
+                closeModal();
+                await loadAds();
+
             } catch (error) {
                 console.error('Ошибка обновления:', error);
                 showMessage('Ошибка при обновлении', 'error');
@@ -904,6 +1071,18 @@
                 return;
             }
 
+            // Проверка лимита фото для нового объявления
+            if (!adId && currentPhotos.length > 5) {
+                showMessage('Максимум 5 фотографий на объявление', 'error');
+                return;
+            }
+
+            // Проверка лимита для редактирования
+            if (adId && (existingPhotos.length + currentPhotos.length) > 5) {
+                showMessage(`Максимум 5 фотографий. Сейчас: ${existingPhotos.length} существующих + ${currentPhotos.length} новых = ${existingPhotos.length + currentPhotos.length}`, 'error');
+                return;
+            }
+
             if (adId && adId !== '') {
                 updateAd(parseInt(adId), { title, price: parseInt(price), category, description });
             } else {
@@ -912,26 +1091,64 @@
                 formData.append('price', price);
                 formData.append('category', category);
                 formData.append('description', description);
-                currentPhotos.forEach(file => {
+
+                // Добавляем только первые 5 фото
+                const photosToAdd = currentPhotos.slice(0, 5);
+                photosToAdd.forEach(file => {
                     formData.append('photos', file);
                 });
+
                 createAd(formData);
             }
         }
 
         function handlePhotoSelect(files) {
-            currentPhotos = Array.from(files).slice(0, 5);
+            const maxPhotos = 5;
+            const currentTotal = existingPhotos.length + currentPhotos.length;
+            const availableSlots = maxPhotos - currentTotal;
+
+            if (availableSlots <= 0) {
+                showMessage(`Максимум ${maxPhotos} фотографий на объявление`, 'error');
+                return;
+            }
+
+            // Берем только столько, сколько помещается
+            const newFiles = Array.from(files).slice(0, availableSlots);
+
+            if (newFiles.length < files.length) {
+                showMessage(`Можно добавить еще ${availableSlots} фотографий. Добавлено ${newFiles.length} из ${files.length}`, 'warning');
+            }
+
+            currentPhotos = [...currentPhotos, ...newFiles];
             updatePhotoPreview();
         }
 
         function updatePhotoPreview() {
             const preview = document.getElementById('photoPreview');
+            const maxPhotos = 5;
+            const remainingSlots = maxPhotos - (existingPhotos.length + currentPhotos.length);
+
+            if (currentPhotos.length === 0) {
+                preview.innerHTML = '';
+                return;
+            }
+
             preview.innerHTML = currentPhotos.map((file, index) => `
-                <div class="preview-item">
-                    <img src="${URL.createObjectURL(file)}" alt="preview">
-                    <div class="remove-photo" onclick="removePhoto(${index})">×</div>
-                </div>
-            `).join('');
+        <div class="preview-item">
+            <img src="${URL.createObjectURL(file)}" alt="preview">
+            <div class="remove-photo" onclick="removeNewPhoto(${index})">×</div>
+        </div>
+    `).join('');
+
+            // Показываем информацию о лимите
+            if (remainingSlots > 0) {
+                const info = document.createElement('div');
+                info.className = 'photo-limit-info';
+                info.textContent = `📸 Можно добавить еще ${remainingSlots} фотографий (максимум ${maxPhotos})`;
+                if (!document.querySelector('.photo-limit-info')) {
+                    preview.parentNode.insertBefore(info, preview.nextSibling);
+                }
+            }
         }
 
         function removePhoto(index) {
@@ -940,6 +1157,7 @@
         }
 
         function openCreateModal() {
+            clearPhotoLimitError();
             document.getElementById('adId').value = '';
             document.getElementById('modalTitle').textContent = 'Создать объявление';
             document.getElementById('title').value = '';
@@ -951,28 +1169,56 @@
             document.getElementById('modal').classList.add('active');
         }
 
-        function openEditModal(adId) {
-            const card = document.querySelector(`.ad-card[data-id="${adId}"]`);
-            if (card) {
-                const title = card.querySelector('.ad-title').textContent;
-                const priceText = card.querySelector('.ad-price').textContent;
-                const price = parseInt(priceText.replace(' ₽', '').replace(/\s/g, ''));
-                const category = card.querySelector('.ad-category').textContent;
-                const description = card.querySelector('.ad-description').textContent;
-                
-                document.getElementById('adId').value = adId;
-                document.getElementById('modalTitle').textContent = 'Редактировать объявление';
-                document.getElementById('title').value = title;
-                document.getElementById('price').value = price;
-                document.getElementById('category').value = category;
-                document.getElementById('description').value = description === 'Без описания' ? '' : description;
-                currentPhotos = [];
-                updatePhotoPreview();
-                document.getElementById('modal').classList.add('active');
+        async function openEditModal(adId) {
+            clearPhotoLimitError();
+            currentAdId = adId;
+
+            try {
+                // Загружаем существующие фото
+                const response = await fetch(`http://localhost:5000/api/ads/${adId}/photos`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    existingPhotos = data.photos;
+                } else {
+                    existingPhotos = [];
+                }
+
+                // Находим карточку объявления
+                const card = document.querySelector(`.ad-card[data-id="${adId}"]`);
+
+                if (card) {
+                    const title = card.querySelector('.ad-title').textContent;
+                    const priceText = card.querySelector('.ad-price').textContent;
+                    const price = parseInt(priceText.replace(' ₽', '').replace(/\s/g, ''));
+                    const category = card.querySelector('.ad-category').textContent;
+                    const description = card.querySelector('.ad-description').textContent;
+
+                    document.getElementById('adId').value = adId;
+                    document.getElementById('modalTitle').textContent = 'Редактировать объявление';
+                    document.getElementById('title').value = title;
+                    document.getElementById('price').value = price;
+                    document.getElementById('category').value = category;
+                    document.getElementById('description').value = description === 'Без описания' ? '' : description;
+
+                    // Очищаем новые фото
+                    currentPhotos = [];
+
+                    // Отображаем существующие фото
+                    renderExistingPhotos();
+                    updatePhotoPreview();
+
+                    document.getElementById('modal').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки фото:', error);
             }
         }
 
         function closeModal() {
+            clearPhotoLimitError();
             document.getElementById('modal').classList.remove('active');
         }
 
@@ -992,16 +1238,140 @@
             window.location.href = '/';
         }
 
+        function renderExistingPhotos() {
+            const container = document.getElementById('existingPhotos');
+            const maxPhotos = 5;
+
+            if (existingPhotos.length === 0) {
+                container.innerHTML = '<p style="color: #999; font-size: 14px;">Нет фотографий</p>';
+                return;
+            }
+
+            container.innerHTML = existingPhotos.map(photo => `
+        <div class="existing-photo-item" data-photo-id="${photo.id}" data-photo-url="${photo.url}">
+            <img src="${photo.url}" alt="Фото">
+            <button class="delete-photo" onclick="deleteExistingPhoto(${photo.id})">×</button>
+        </div>
+    `).join('');
+
+            // Показываем информацию о лимите
+            const remaining = maxPhotos - existingPhotos.length;
+            if (remaining <= 0) {
+                const warning = document.createElement('div');
+                warning.className = 'photo-limit-warning';
+                warning.textContent = '⚠️ Достигнут лимит фотографий (5). Удалите некоторые, чтобы добавить новые.';
+                container.parentNode.insertBefore(warning, container.nextSibling);
+            }
+        }
+
+        async function deleteExistingPhoto(photoId) {
+            if (!confirm('Удалить это фото?')) return;
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/photos/${photoId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Удаляем из массива
+                    existingPhotos = existingPhotos.filter(p => p.id !== photoId);
+                    renderExistingPhotos();
+                    showMessage('Фото удалено', 'success');
+                } else {
+                    showMessage('Ошибка удаления', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showMessage('Ошибка при удалении', 'error');
+            }
+            if (existingPhotos.length + currentPhotos.length < 5) {
+                clearPhotoLimitError();  // Очищаем сообщение, если теперь есть место
+            }
+        }
+
+        function removeNewPhoto(index) {
+            currentPhotos.splice(index, 1);
+            updatePhotoPreview();
+            clearPhotoLimitError();
+        }
+
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = text;
+            msgDiv.className = `message ${type}`;
+            msgDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                msgDiv.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Функция очистки ошибок лимита фото
+        // Функция очистки всех ошибок и предупреждений о лимите
+        function clearPhotoLimitError() {
+            // Удаляем сообщения с классом photo-limit-warning
+            const warnings = document.querySelectorAll('.photo-limit-warning');
+            warnings.forEach(warning => warning.remove());
+
+            // Удаляем сообщения с классом photo-limit-error
+            const errors = document.querySelectorAll('.photo-limit-error');
+            errors.forEach(error => error.remove());
+
+            // Удаляем информационные сообщения
+            const info = document.querySelectorAll('.photo-limit-info');
+            info.forEach(msg => msg.remove());
+
+            // Убираем подсветку с контейнера фото
+            const photoContainer = document.querySelector('#existingPhotos')?.parentElement;
+            if (photoContainer) {
+                photoContainer.style.border = '';
+                photoContainer.style.borderRadius = '';
+                photoContainer.style.padding = '';
+            }
+        }
+
+        // Использование при попытке добавить фото
+        function handlePhotoSelect(files) {
+            const maxPhotos = 5;
+            const totalPhotos = existingPhotos.length + currentPhotos.length;
+
+            // Очищаем старые ошибки
+            clearPhotoLimitError();
+
+            if (totalPhotos >= maxPhotos) {
+                // Показываем ошибку
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'photo-limit-error';
+                errorDiv.style.cssText = 'color: #e53e3e; font-size: 12px; margin-top: 8px; padding: 8px; background: #fee; border-radius: 8px;';
+                errorDiv.textContent = `❌ Максимум ${maxPhotos} фотографий! Удалите лишние перед добавлением новых.`;
+
+                const uploadArea = document.getElementById('photoUploadArea');
+                if (uploadArea && !document.querySelector('.photo-limit-error')) {
+                    uploadArea.parentNode.insertBefore(errorDiv, uploadArea.nextSibling);
+                }
+                return;
+            }
+
+            // Если есть место - добавляем фото
+            const availableSlots = maxPhotos - totalPhotos;
+            const filesToAdd = Array.from(files).slice(0, availableSlots);
+            currentPhotos = [...currentPhotos, ...filesToAdd];
+            updatePhotoPreview();
+        }
+
         // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('logoutBtn').addEventListener('click', logout);
             document.getElementById('openCreateModal').addEventListener('click', openCreateModal);
             document.getElementById('closeModalBtn').addEventListener('click', closeModal);
             document.getElementById('saveAdBtn').addEventListener('click', saveAd);
-            
+
             const uploadArea = document.getElementById('photoUploadArea');
             const photoInput = document.getElementById('photos');
-            
+
             uploadArea.addEventListener('click', () => photoInput.click());
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -1015,17 +1385,18 @@
                 uploadArea.style.borderColor = '#e0e0e0';
                 handlePhotoSelect(e.dataTransfer.files);
             });
-            
+
             photoInput.addEventListener('change', (e) => {
                 handlePhotoSelect(e.target.files);
             });
-            
-            document.getElementById('modal').addEventListener('click', function(e) {
+
+            document.getElementById('modal').addEventListener('click', function (e) {
                 if (e.target === this) closeModal();
             });
-            
+
             checkAuth();
         });
     </script>
 </body>
+
 </html>
