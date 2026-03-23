@@ -286,11 +286,8 @@
                     if (result.token) {
                         localStorage.setItem('auth_token', result.token);
                     }
-
-                    // Перенаправляем через 1.5 секунды
-                    setTimeout(() => {
-                        window.location.href = '/dashboard'; // или на главную
-                    }, 1500);
+                    window.location.href = '/marketplace';
+                    
                 } else {
                     showServerMessage('error', result.error || 'Неверный email или пароль');
                 }
