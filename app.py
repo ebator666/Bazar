@@ -11,6 +11,7 @@ import secrets
 import os
 import uuid
 from werkzeug.utils import secure_filename
+import sqlite3
 
 app = Flask(__name__)
 CORS(app, origins='*', supports_credentials=True)
@@ -160,6 +161,7 @@ def create_ad_route():
     description = request.form.get('description', '').strip()
     category = request.form.get('category', '').strip()
     
+    # Валидация
     if not title or len(title) < 3:
         return jsonify({'success': False, 'error': 'Название должно быть минимум 3 символа'}), 400
     
@@ -169,6 +171,12 @@ def create_ad_route():
     if not category:
         return jsonify({'success': False, 'error': 'Выберите категорию'}), 400
     
+    # Проверка количества фото
+    files = request.files.getlist('photos')
+    if len(files) > 5:
+        return jsonify({'success': False, 'error': 'Максимум 5 фотографий'}), 400
+    
+    # Создаем объявление
     ad_id = create_ad(
         user_data[0],
         user_data[3] or "не указана",
@@ -181,9 +189,8 @@ def create_ad_route():
     if not ad_id:
         return jsonify({'success': False, 'error': 'Ошибка при создании объявления'}), 500
     
+    # Добавляем фото (максимум 5)
     uploaded_photos = []
-    files = request.files.getlist('photos')
-    
     for i, file in enumerate(files[:5]):
         if file and allowed_file(file.filename):
             ext = file.filename.rsplit('.', 1)[1].lower()
@@ -198,7 +205,8 @@ def create_ad_route():
     return jsonify({
         'success': True,
         'message': 'Объявление создано!',
-        'ad': {'id': ad_id, 'title': title, 'price': price}
+        'ad': {'id': ad_id, 'title': title, 'price': price},
+        'photos_count': len(uploaded_photos)
     }), 201
 
 # Обновление объявления
@@ -378,6 +386,101 @@ def login():
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# Добавление фото к существующему объявлению
+@app.route('/api/ads/<int:ad_id>/photos', methods=['POST'])
+def add_photos_to_ad(ad_id):
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    
+    if not token:
+        return jsonify({'success': False, 'error': 'Не авторизован'}), 401
+    
+    user_data = get_user_token(token)
+    if not user_data:
+        return jsonify({'success': False, 'error': 'Сессия истекла'}), 401
+    
+    # Проверяем, что объявление принадлежит пользователю
+    ad = get_ad_by_id(ad_id)
+    if not ad or ad[1] != user_data[0]:
+        return jsonify({'success': False, 'error': 'Объявление не найдено'}), 404
+    
+    # Получаем текущее количество фото
+    current_photos = get_ad_photos(ad_id)
+    current_count = len(current_photos)
+    
+    # Проверяем лимит
+    if current_count >= 5:
+        return jsonify({'success': False, 'error': 'Максимум 5 фотографий на объявление'}), 400
+    
+    # Загружаем новые фото
+    files = request.files.getlist('photos')
+    max_new = 5 - current_count
+    
+    if len(files) > max_new:
+        return jsonify({'success': False, 'error': f'Можно добавить только {max_new} фото (всего максимум 5)'}), 400
+    
+    uploaded = []
+    for i, file in enumerate(files[:max_new]):
+        if file and allowed_file(file.filename):
+            ext = file.filename.rsplit('.', 1)[1].lower()
+            filename = f"{uuid.uuid4().hex}.{ext}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            
+            photo_url = f"/uploads/{filename}"
+            add_photo(ad_id, photo_url, current_count + i)
+            uploaded.append(photo_url)
+    
+    return jsonify({'success': True, 'photos': uploaded, 'photos_count': current_count + len(uploaded)}), 200
+
+# Удаление отдельного фото
+@app.route('/api/photos/<int:photo_id>', methods=['DELETE'])
+def delete_photo_route(photo_id):
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    
+    if not token:
+        return jsonify({'success': False, 'error': 'Не авторизован'}), 401
+    
+    user_data = get_user_token(token)
+    if not user_data:
+        return jsonify({'success': False, 'error': 'Сессия истекла'}), 401
+    
+    # Получаем информацию о фото
+    conn = sqlite3.connect('test.db')
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT p.photo_id, p.photo_url, p.ad_id, a.seller_id
+        FROM ad_photos p
+        JOIN ads a ON p.ad_id = a.ad_id
+        WHERE p.photo_id = ?
+    """, (photo_id,))
+    photo = cur.fetchone()
+    conn.close()
+    
+    if not photo:
+        return jsonify({'success': False, 'error': 'Фото не найдено'}), 404
+    
+    # Проверяем, что фото принадлежит пользователю
+    if photo[3] != user_data[0]:
+        return jsonify({'success': False, 'error': 'Доступ запрещен'}), 403
+    
+    # Удаляем файл
+    try:
+        filename = photo[1].split('/')[-1]
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+    except:
+        pass
+    
+    # Удаляем запись из БД
+    conn = sqlite3.connect('test.db')
+    cur = conn.cursor()
+    cur.execute("DELETE FROM ad_photos WHERE photo_id = ?", (photo_id,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Фото удалено'}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
