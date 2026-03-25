@@ -982,7 +982,7 @@
         async function updateAd(adId, formData) {
             try {
                 // Сначала обновляем текстовые данные
-                const response = await fetch(`http://localhost:5000/api/ads/${adId}`, {
+                const response = await fetch(`/api/ads/${adId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': 'Bearer ' + token,
@@ -1005,7 +1005,7 @@
                         photoFormData.append('photos', file);
                     });
 
-                    const photoResponse = await fetch(`http://localhost:5000/api/ads/${adId}/photos`, {
+                    const photoResponse = await fetch(`/api/ads/${adId}/photos`, {
                         method: 'POST',
                         headers: { 'Authorization': 'Bearer ' + token },
                         body: photoFormData
@@ -1175,7 +1175,7 @@
 
             try {
                 // Загружаем существующие фото
-                const response = await fetch(`http://localhost:5000/api/ads/${adId}/photos`, {
+                const response = await fetch(`/api/ads/${adId}/photos`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
@@ -1268,7 +1268,7 @@
             if (!confirm('Удалить это фото?')) return;
 
             try {
-                const response = await fetch(`http://localhost:5000/api/photos/${photoId}`, {
+                const response = await fetch(`/api/photos/${photoId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
