@@ -73,7 +73,8 @@ def register_user(nickname, email, password, geo):
         
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
-            cur = con.cursor()                
+            cur = con.cursor()  
+            cur.execute("PRAGMA foreign_keys = ON")              
             salt = bcrypt.gensalt()
             hashed_password = bcrypt.hashpw(password.encode("UTF-8"), salt)
             cur.execute("""INSERT INTO users (user_nickname, email, password, user_geolocation) 
@@ -122,6 +123,7 @@ def save_session(user_id, token, days=30):
         expires = datetime.datetime.now() + datetime.timedelta(days=days)
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
             # Удаляем старые сессии этого пользователя
             cur.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
             cur.execute("""INSERT INTO sessions (user_id, token, expires_at) 
@@ -161,6 +163,7 @@ def create_ad(seller_id, seller_geolocation, title, price, description, category
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
             cur.execute("""
                 INSERT INTO ads (seller_id, seller_geolocation, title, price, description, category)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -267,6 +270,7 @@ def delete_ad(ad_id, seller_id):
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON")
             # Фото удалятся автоматически из-за ON DELETE CASCADE
             cur.execute("DELETE FROM ads WHERE ad_id = ? AND seller_id = ?", (ad_id, seller_id))
             con.commit()
