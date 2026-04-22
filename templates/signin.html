@@ -233,7 +233,6 @@
                 Нет аккаунта? <a href="signup.html">Зарегистрироваться</a>
             </div>
         </form>
-        <a href="profile.html" class="profile-btn">👤 Профиль</a>
 
         <!-- Контейнер для сообщений от сервера -->
         <div id="serverMessage" class="server-message"></div>
@@ -289,12 +288,20 @@
                 if (result.success) {
                     showServerMessage('success', 'Вход выполнен успешно! Перенаправление...');
 
-                    // Сохраняем токен если есть
-                    if (result.token) {
-                        localStorage.setItem('auth_token', result.token);
-                    }
-                    window.location.href = '/marketplace';
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user_id', result.user_id);
 
+                    const params = new URLSearchParams(window.location.search);
+                    const nextPage = params.get('next');
+                    const tab = params.get('tab');
+
+                    if (nextPage) {
+                        window.location.href = nextPage;
+                    } else if (tab) {
+                        window.location.href = `/profile?tab=${tab}`;
+                    } else {
+                        window.location.href = '/profile';
+                    }
                 } else {
                     showServerMessage('error', result.error || 'Неверный email или пароль');
                 }

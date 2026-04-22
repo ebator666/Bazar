@@ -4,7 +4,8 @@ from database import (
     register_user, login_user, save_session, get_user_token, create_db,
     create_ad, get_user_ads, get_ad_by_id, update_ad, delete_ad,
     add_photo, get_ad_photos, delete_ad_photos, PHOTO_FOLDER,
-    get_all_ads, get_ad_with_seller
+    get_all_ads, get_ad_with_seller, get_profile_photo, update_user_profile,
+    add_profile_photo
 )
 import hashlib
 import secrets
@@ -42,7 +43,11 @@ def signin_page():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html')  # Список объявлений пользователя
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')  # Настройки профиля
 
 @app.route('/ad/<int:ad_id>')
 def ad_detail(ad_id):
@@ -272,6 +277,139 @@ def delete_ad_route(ad_id):
     
     return jsonify({'success': False, 'error': 'Объявление не найдено'}), 404
 
+
+    # ✅ НОВЫЕ API ПРОФИЛЬ (вставить после /api/ad/<int:ad_id>)
+@app.route('/api/profile', methods=['GET'])
+def get_profile():
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if not token:
+        return jsonify({'success': False, 'error': 'Токен нужен'}), 401
+
+    user_data = get_user_token(token)
+    if not user_data:
+        return jsonify({'success': False, 'error': 'Сессия истекла'}), 401
+
+    profile_photo = get_profile_photo(user_data[0])
+
+    return jsonify({
+        'success': True,
+        'name': user_data[1],
+        'email': user_data[2],
+        'geolocation': user_data[3],
+        'age': user_data[4],
+        'direction': user_data[5],
+        'student_group': user_data[6],
+        'dormitory': user_data[7],
+        'phone': user_data[8],
+        'profile_photo': profile_photo
+    })
+
+@app.route('/api/profile', methods=['PATCH'])
+def update_profile():
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if not token:
+        return jsonify({'success': False, 'error': 'Токен нужен'}), 401
+
+    user_data = get_user_token(token)
+    if not user_data:
+        return jsonify({'success': False, 'error': 'Сессия истекла'}), 401
+
+    data = request.get_json(force=True, silent=True)
+    if not data:
+        return jsonify({'success': False, 'error': 'Невалидный JSON'}), 400
+
+    email = data.get('email', '').strip()
+    name = data.get('name', '').strip()
+    age = data.get('age')
+    direction = data.get('direction')
+    student_group = data.get('student_group')
+    dormitory = data.get('dormitory')
+    phone = data.get('phone')
+
+    if not name or len(name) < 2:
+        return jsonify({'success': False, 'error': 'Имя слишком короткое'}), 400
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'error': 'Введите корректный email'}), 400
+
+
+    try:
+        if update_user_profile(
+            user_data[0],
+            name,
+            email,
+            age,
+            direction,
+            student_group,
+            dormitory,
+            phone
+        ):
+            return jsonify({'success': True, 'message': 'Профиль обновлён'})
+        else:
+            return jsonify({'success': False, 'error': 'Пользователь не найден'}), 404
+    except Exception as e:
+        print(f"DB Error update_profile: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/profile/photo', methods=['POST'])
+def upload_profile_photo():
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if not token:
+        return jsonify({'success': False, 'error': 'Не авторизован'}), 401
+    
+    user_data = get_user_token(token)
+    if not user_data:
+        return jsonify({'success': False, 'error': 'Сессия истекла'}), 401
+    
+    file = request.files.get('profile_photo')
+    print(f"DEBUG: Получен файл {file.filename if file else 'НЕТ'}, размер: {file.content_length if file else 0}")  # ✅ ДЕБАГ
+    
+    if not file or not file.filename:
+        return jsonify({'success': False, 'error': 'Файл не выбран'}), 400
+    
+    if not allowed_file(file.filename):
+        return jsonify({'success': False, 'error': 'Неверный формат'}), 400
+    
+    print(f"DEBUG: PHOTO_FOLDER = {PHOTO_FOLDER}")  # ✅ Проверим путь
+    
+    # Создаём уникальное имя
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    filename = f"profile_{user_data[0]}_{uuid.uuid4().hex}.{ext}"
+    filepath = os.path.join(PHOTO_FOLDER, filename)
+    
+    # ✅ Сохраняем и проверяем
+    try:
+        file.save(filepath)
+        if not os.path.exists(filepath):
+            raise Exception("Файл не сохранён!")
+        
+        file_size = os.path.getsize(filepath)
+        print(f"✅ Файл сохранён: {filepath}, размер: {file_size} байт")
+        
+    except Exception as save_error:
+        print(f"❌ Ошибка сохранения файла: {save_error}")
+        return jsonify({'success': False, 'error': f'Ошибка диска: {str(save_error)}'}), 500
+    
+    # ✅ Сохраняем в БД
+    db_success = add_profile_photo(
+        user_data[0], 
+        filename, 
+        secure_filename(file.filename),  # Безопасное имя
+        file.content_type or 'image/jpeg', 
+        file_size
+    )
+    
+    if not db_success:
+        # Откатываем файл
+        try:
+            os.remove(filepath)
+        except: pass
+        print("❌ Ошибка БД, файл удалён")
+        return jsonify({'success': False, 'error': 'Ошибка сохранения в БД'}), 500
+    
+    photo_url = f'/uploads/{filename}'
+    print(f"✅ УСПЕХ: {photo_url}")
+    return jsonify({'success': True, 'profile_photo': photo_url}), 201
+    
 # Проверка токена
 @app.route('/check-auth', methods=['GET'])
 def check_auth():
@@ -290,21 +428,25 @@ def check_auth():
 @app.route('/user/<int:user_id>')
 def get_user(user_id):
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
-    
     if not token:
         return jsonify({'success': False, 'error': 'Токен не предоставлен'}), 401
-    
+
     user_data = get_user_token(token)
-    
+
     if user_data and user_data[0] == user_id:
         return jsonify({
             'success': True,
             'username': user_data[1],
             'email': user_data[2],
             'geolocation': user_data[3],
+            'age': user_data[4],
+            'direction': user_data[5],
+            'student_group': user_data[6],
+            'dormitory': user_data[7],
+            'phone': user_data[8],
             'user_id': user_data[0]
         })
-    
+
     return jsonify({'success': False, 'error': 'Сессия истекла или неверна'}), 401
 
 # Обработка регистрации
@@ -484,3 +626,4 @@ def delete_photo_route(photo_id):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
+

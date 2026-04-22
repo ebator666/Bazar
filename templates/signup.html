@@ -265,14 +265,12 @@
                     showServerMessage('success', result.message || 'Регистрация успешна! Перенаправление...');
                     document.getElementById('registerForm').reset();
 
-                    // СОХРАНЯЕМ ТОКЕН ЕСЛИ ОН ЕСТЬ
-                    if (result.token) {
-                        localStorage.setItem('auth_token', result.token);
-                        console.log('Токен сохранен:', result.token);
-                    }
+                    // ✅ НОВЫЕ 3 СТРОКИ:
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user_id', result.user_id);
 
                     setTimeout(() => {
-                        window.location.href = '/marketplace';
+                        window.location.href = '/profile';  // ← Твой профиль
                     }, 1500);
 
                 } else {

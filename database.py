@@ -3,6 +3,9 @@ import sqlite3 as sq
 import datetime
 import os
 
+PHOTO_FOLDER = 'static/uploads'
+os.makedirs(PHOTO_FOLDER, exist_ok=True)
+
 def create_db():
     with sq.connect("test.db", check_same_thread=False) as con:
         cur = con.cursor()
@@ -14,7 +17,12 @@ def create_db():
             user_nickname TEXT NOT NULL UNIQUE,
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
-            user_geolocation TEXT NOT NULL
+            user_geolocation TEXT NOT NULL,
+            age INTEGER,
+            direction TEXT,
+            student_group TEXT,
+            dormitory TEXT,
+            phone TEXT
         )""")
 
         # Таблица объявлений
@@ -39,6 +47,19 @@ def create_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (ad_id) REFERENCES ads (ad_id) ON DELETE CASCADE
         )""")
+#  НОВАЯ ТАБЛИЦА profile_photos ДОБАВЬТЕ ЗДЕСЬ
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS profile_photos (
+                photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                filename TEXT NOT NULL,
+                original_name TEXT,
+                mime_type TEXT,
+                size INTEGER,
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
+            )
+        """)
 
         # Таблица сессий
         cur.execute("""CREATE TABLE IF NOT EXISTS sessions (
@@ -135,22 +156,25 @@ def save_session(user_id, token, days=30):
         print(f"Ошибка сохранения сессии: {e}")
         return False
 
-
 def get_user_token(token):
-    """Проверяет токен и возвращает данные пользователя"""
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
             cur.execute("""SELECT user_id FROM sessions 
-                           WHERE token = ? AND expires_at > ?""", 
-                       (token, datetime.datetime.now()))
+                           WHERE token = ? AND expires_at > ?""",
+                        (token, datetime.datetime.now()))
             session = cur.fetchone()
             if session:
-                cur.execute("""SELECT user_nickname, email, user_geolocation 
-                               FROM users WHERE user_id = ?""", 
-                           (session[0],))
+                user_id = session[0]
+                cur.execute("""SELECT user_nickname, email, user_geolocation, 
+                                      age, direction, student_group, dormitory, phone
+                               FROM users WHERE user_id = ?""",
+                            (user_id,))
                 user = cur.fetchone()
-                return (session[0], user[0], user[1], user[2])
+                if user:
+                    # user = (nickname, email, geo, age, direction, student_group, dormitory, phone)
+                    return (user_id, *user)   # возвращает: (id, name, email, geo, age, ...)
+                return None
             return None
     except sq.Error:
         return None
@@ -328,6 +352,53 @@ def delete_ad_photos(ad_id):
         return False
 
 
-# ============= ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ =============
+#  функции:
+def update_user_profile(user_id, nickname, email, age=None, direction=None, student_group=None, dormitory=None, phone=None):
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("""
+                UPDATE users
+                SET user_nickname = ?,
+                    email = ?,
+                    age = ?,
+                    direction = ?,
+                    student_group = ?,
+                    dormitory = ?,
+                    phone = ?
+                WHERE user_id = ?
+            """, (nickname, email, age, direction, student_group, dormitory, phone, user_id))
+            con.commit()
+            return cur.rowcount > 0
+    except Exception as e:
+        print("DB Error update_user_profile:", e)
+        return False
+
+
+
+def get_profile_photo(user_id):
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("SELECT filename FROM profile_photos WHERE user_id = ? ORDER BY photo_id DESC LIMIT 1", (user_id,))
+            result = cur.fetchone()
+            return f"/uploads/{result[0]}" if result else None
+    except:
+        return None
+
+def add_profile_photo(user_id, filename, original_name, mime_type, size):
+    try:
+        with sq.connect("test.db", check_same_thread=False) as con:
+            cur = con.cursor()
+            cur.execute("""
+                INSERT INTO profile_photos (user_id, filename, original_name, mime_type, size)
+                VALUES (?, ?, ?, ?, ?)
+            """, (user_id, filename, original_name, mime_type, size))
+            con.commit()
+        return True
+    except:
+        return False
+
+# Инициализация
 create_db()
 print("✅ База данных инициализирована")
