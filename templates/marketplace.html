@@ -294,10 +294,10 @@
                 <a href="/marketplace">Главная</a>
                 <div id="authSection">
                     <div class="user-menu">
-                    <span class="user-name" id="userName">Загрузка...</span>
-                    <a href="/dashboard" class="btn-primary">Мои объявления</a>
-                    <button onclick="logout()" class="btn-outline">Выйти</button>
-                </div>
+                        <span class="user-name" id="userName">Загрузка...</span>
+                        <a href="/dashboard" class="btn-primary">Мои объявления</a>
+                        <button onclick="logout()" class="btn-outline">Выйти</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -328,7 +328,7 @@
             </div>
         </div>
     </div>
-    
+
 
     <script>
         let allAds = [];
@@ -420,7 +420,7 @@
 
         // Проверка авторизации для отображения меню
         async function checkAuth() {
-            const token = localStorage.getItem('auth_token');
+            const token = localStorage.getItem('token');
             const authSection = document.getElementById('authSection');
 
             if (token) {
@@ -438,10 +438,9 @@
                     console.log('Не авторизован');
                 }
             }
-            if (!token) {
-                window.location.href = '/signin';
-                return false;
-            }
+
+            // если токена нет — НЕ просто редирект, а с next
+            window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
         }
 
         async function loadUserName(userId) {

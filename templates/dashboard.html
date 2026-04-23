@@ -845,8 +845,10 @@
 
         // Проверка авторизации
         async function checkAuth() {
+            const token = localStorage.getItem('token');   // или 'auth_token' — выбери единое имя
+
             if (!token) {
-                window.location.href = '/signin';
+                window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
                 return false;
             }
 
@@ -862,8 +864,8 @@
                     await loadAds();
                     return true;
                 } else {
-                    localStorage.removeItem('auth_token');
-                    window.location.href = '/signin';
+                    localStorage.removeItem('token');   // или 'auth_token' — везде одинаково
+                    window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
                     return false;
                 }
             } catch (error) {

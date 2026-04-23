@@ -638,8 +638,8 @@
 <body>
     <header class="header">
         <nav class="nav-left">
-            <a href="#" class="nav-link">Главная</a>
-            <a href="#" class="nav-link">Доска объявлений</a>
+            <a href="/marketplace" class="nav-link">Главная</a>
+            <a href="/marketplace" class="nav-link">Доска объявлений</a>
             <a href="#" class="nav-link">Категории</a>
         </nav>
 
@@ -650,8 +650,8 @@
         <nav class="nav-right">
             <button class="icon-btn heart-btn" aria-label="Избранное"><span>♡</span></button>
             <button class="icon-btn cart-btn" aria-label="Корзина"><span>🛒</span></button>
-            <a href="#" class="nav-link logout">Выйти из профиля</a>
-            <a href="#" class="post-btn">+ Разместить объявление</a>
+            <a href="/signin" class="nav-link logout" onclick="logout(event)">Выйти из профиля</a>
+            <a href="/dashboard" class="post-btn">+ Разместить объявление</a>
         </nav>
     </header>
 
@@ -894,7 +894,39 @@
 
                 return { photoInput, uploadBtn, previewDiv };
             }
+            async function checkAuth() {
+                const token = localStorage.getItem('token');   // или 'auth_token' — выбери единое имя
 
+                if (!token) {
+                    window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+                    return false;
+                }
+
+                try {
+                    const response = await fetch('/check-auth', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await response.json();
+
+                    if (data.authenticated) {
+                        currentUserId = data.user_id;
+                        await loadProfileData(currentUserId);   // если у тебя есть такая функция
+                        return true;
+                    } else {
+                        localStorage.removeItem('token');
+                        window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Ошибка проверки в профиле:', error);
+                    return false;
+                }
+            }
+
+            // Вызови проверку при загрузке страницы
+            document.addEventListener('DOMContentLoaded', () => {
+                checkAuth();
+            });
             async function loadProfile() {
                 try {
                     const token = localStorage.getItem("token");
@@ -950,6 +982,12 @@
                     console.error("Ошибка loadProfile:", error);
                     window.location.href = "/signin";
                 }
+            }
+
+            function logout(event) {
+                event.preventDefault();
+                localStorage.removeItem('token');
+                window.location.href = '/signin';   // или '/signin?next=/marketplace', если нужно
             }
 
             //  Инициализируем фото
