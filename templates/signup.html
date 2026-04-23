@@ -223,9 +223,9 @@
             }
 
             // Валидация email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const emailRegex = /^[^\s@]+@mai\.education$/;
             if (!emailRegex.test(email)) {
-                showError('emailError', 'Введите корректный email');
+                showError('emailError', 'Введите email вида name@mai.education');
                 isValid = false;
             }
 

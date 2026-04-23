@@ -13,6 +13,9 @@ import os
 import uuid
 from werkzeug.utils import secure_filename
 import sqlite3
+import re
+
+EMAIL_REGEX = r'^[^\s@]+@mai\.education$'
 
 app = Flask(__name__)
 CORS(app, origins='*', supports_credentials=True)
@@ -328,7 +331,7 @@ def update_profile():
 
     if not name or len(name) < 2:
         return jsonify({'success': False, 'error': 'Имя слишком короткое'}), 400
-    if not email or '@' not in email:
+    if not email or not re.match(EMAIL_REGEX, email):
         return jsonify({'success': False, 'error': 'Введите корректный email'}), 400
 
 
@@ -409,7 +412,7 @@ def upload_profile_photo():
     photo_url = f'/uploads/{filename}'
     print(f"✅ УСПЕХ: {photo_url}")
     return jsonify({'success': True, 'profile_photo': photo_url}), 201
-    
+
 # Проверка токена
 @app.route('/check-auth', methods=['GET'])
 def check_auth():
@@ -462,7 +465,7 @@ def register():
         if not username or len(username) < 3:
             return jsonify({'success': False, 'error': 'Имя пользователя должно быть минимум 3 символа'}), 400
             
-        if not email or '@' not in email:
+        if not email or not re.match(EMAIL_REGEX, email):
             return jsonify({'success': False, 'error': 'Введите корректный email'}), 400
             
         if not password or len(password) < 8:
@@ -499,7 +502,7 @@ def login():
         password = data.get('password')
         remember = data.get('remember') == 'true'
 
-        if not email or '@' not in email:
+        if not email or not re.match(EMAIL_REGEX, email):
             return jsonify({'success': False, 'error': 'Введите корректный email'}), 400
             
         if not password:
