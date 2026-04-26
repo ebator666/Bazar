@@ -67,15 +67,17 @@ def get_all_ads_route():
         for ad in ads:
             photos = get_ad_photos(ad[0])
             first_photo = photos[0][1] if photos else None
-            
+
             result.append({
                 'id': ad[0],
                 'title': ad[1],
                 'price': ad[2],
                 'description': ad[3],
-                'category': ad[4],
-                'seller_name': ad[5],
-                'created_at': ad[6],
+                'category': ad[4],           # "Техника", "Репетиторство"
+                'category_slug': ad[5],      # "electronics", "tutoring"
+                'category_type': ad[6],      # "goods", "services"
+                'seller_name': ad[7],
+                'created_at': ad[8],
                 'first_photo': first_photo
             })
         return jsonify({'success': True, 'ads': result})
@@ -152,51 +154,62 @@ def get_ad_photos_route(ad_id):
     result = [{'id': p[0], 'url': p[1], 'order': p[2]} for p in photos]
     return jsonify({'success': True, 'photos': result})
 
-# Создание объявления
 @app.route('/api/ads', methods=['POST'])
 def create_ad_route():
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
-    
     if not token:
         return jsonify({'success': False, 'error': 'Не авторизован'}), 401
-    
+
     user_data = get_user_token(token)
     if not user_data:
         return jsonify({'success': False, 'error': 'Сессия истекла'}), 401
-    
+
     title = request.form.get('title', '').strip()
     price = request.form.get('price')
     description = request.form.get('description', '').strip()
-    category = request.form.get('category', '').strip()
-    
+    category = request.form.get('category', '').strip()  # например: "Техника", "Репетиторство"
+
     # Валидация
     if not title or len(title) < 3:
         return jsonify({'success': False, 'error': 'Название должно быть минимум 3 символа'}), 400
-    
+
     if not price or not str(price).isdigit() or int(price) <= 0:
         return jsonify({'success': False, 'error': 'Введите корректную цену'}), 400
-    
+
     if not category:
         return jsonify({'success': False, 'error': 'Выберите категорию'}), 400
-    
+
     # Проверка количества фото
     files = request.files.getlist('photos')
     if len(files) > 5:
         return jsonify({'success': False, 'error': 'Максимум 5 фотографий'}), 400
-    
-    # Создаем объявление
+
+    # Получаем category_id из базы по имени категории
+    try:
+        with sqlite3.connect('test.db') as con:
+            cur = con.cursor()
+            cur.execute("SELECT id FROM categories WHERE name = ?", (category,))
+            row = cur.fetchone()
+            if not row:
+                return jsonify({'success': False, 'error': 'Неизвестная категория'}), 400
+            category_id = row[0]
+    except Exception as e:
+        print(f"Ошибка получения категории: {e}")
+        return jsonify({'success': False, 'error': 'Ошибка сервера'}), 500
+
+    # Создаём объявление (теперь через category_id)
     ad_id = create_ad(
         user_data[0],
         user_data[3] or "не указана",
         title,
         int(price),
         description,
-        category
+        category_id  # вместо строки
     )
-    
+
     if not ad_id:
         return jsonify({'success': False, 'error': 'Ошибка при создании объявления'}), 500
-    
+
     # Добавляем фото (максимум 5)
     uploaded_photos = []
     for i, file in enumerate(files[:5]):
@@ -205,11 +218,11 @@ def create_ad_route():
             filename = f"{uuid.uuid4().hex}.{ext}"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
-            
+
             photo_url = f"/uploads/{filename}"
             add_photo(ad_id, photo_url, i)
             uploaded_photos.append(photo_url)
-    
+
     return jsonify({
         'success': True,
         'message': 'Объявление создано!',

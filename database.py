@@ -25,7 +25,16 @@ def create_db():
             phone TEXT
         )""")
 
-        # Таблица объявлений
+        # Таблица КАТЕГОРИЙ (главное изменение)
+        cur.execute("""CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            slug TEXT NOT NULL UNIQUE,
+            parent_id INTEGER REFERENCES categories(id),
+            type TEXT NOT NULL  -- goods, housing, services, exchange, study, work, transport, events
+        )""")
+
+        # Таблица объявлений (ссылка на категорию, не строка)
         cur.execute("""CREATE TABLE IF NOT EXISTS ads (
             ad_id INTEGER PRIMARY KEY AUTOINCREMENT,
             seller_id INTEGER NOT NULL,
@@ -33,9 +42,10 @@ def create_db():
             title TEXT NOT NULL,
             price INTEGER NOT NULL,
             description TEXT,
-            category TEXT NOT NULL,
+            category_id INTEGER NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (seller_id) REFERENCES users (user_id) ON DELETE CASCADE
+            FOREIGN KEY (seller_id) REFERENCES users (user_id) ON DELETE CASCADE,
+            FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE RESTRICT
         )""")
 
         # Таблица фото объявлений
@@ -47,7 +57,7 @@ def create_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (ad_id) REFERENCES ads (ad_id) ON DELETE CASCADE
         )""")
-#  НОВАЯ ТАБЛИЦА profile_photos ДОБАВЬТЕ ЗДЕСЬ
+#  НОВАЯ ТАБЛИЦА profile_photos 
         cur.execute("""
             CREATE TABLE IF NOT EXISTS profile_photos (
                 photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,6 +80,65 @@ def create_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
         )""")
+
+def create_initial_categories():
+    categories_data = [
+        # type = goods
+        (None, "Товары", "goods", "goods"),
+        (1, "Техника", "electronics", "goods"),
+        (1, "Одежда", "clothes", "goods"),
+        (1, "Мебель", "furniture", "goods"),
+        (1, "Книги", "books", "goods"),
+        (1, "Другое", "other", "goods"),
+
+        # type = housing
+        (None, "Жильё", "housing", "housing"),
+        (7, "Поиск соседей", "search_roommate", "housing"),
+        (7, "Аренда комнаты", "room_rent", "housing"),
+
+        # type = services
+        (None, "Услуги", "services", "services"),
+        (9, "Репетиторство", "tutoring", "services"),
+        (9, "Программирование", "programming", "services"),
+        (9, "Помощь с курсовыми", "coursework_help", "services"),
+
+        # type = exchange
+        (None, "Обмен", "exchange", "exchange"),
+        (13, "Обмен вещами", "item_exchange", "exchange"),
+        (13, "Отдам даром", "giveaway", "exchange"),
+
+        # type = study
+        (None, "Учеба", "study", "study"),
+        (16, "Конспекты", "notes", "study"),
+        (16, "Учебники", "textbooks", "study"),
+        (16, "Подготовка к экзаменам", "exam_prep", "study"),
+
+        # type = work
+        (None, "Работа / Подработка", "work", "work"),
+        (20, "Стажировки", "internship", "work"),
+        (20, "Волонтёрство", "volunteer", "work"),
+        (20, "Вакансии", "vacancy", "work"),
+
+        # type = transport
+        (None, "Транспорт", "transport", "transport"),
+        (24, "Авто", "car", "transport"),
+        (24, "Велосипеды", "bicycle", "transport"),
+
+        # type = events
+        (None, "События", "events", "events"),
+        (27, "Мероприятия", "event", "events"),
+        (27, "Студклубы", "club", "events"),
+    ]
+
+    with sq.connect("test.db", check_same_thread=False) as con:
+        cur = con.cursor()
+        cur.execute("PRAGMA foreign_keys = ON")
+        for parent_id, name, slug, cat_type in categories_data:
+            cur.execute(
+                "INSERT OR IGNORE INTO categories (parent_id, name, slug, type) VALUES (?, ?, ?, ?)",
+                (parent_id, name, slug, cat_type),
+            )
+        con.commit()     
 
 # Создаем папку для фото
 PHOTO_FOLDER = 'static/uploads'
@@ -182,16 +251,15 @@ def get_user_token(token):
 
 # ============= ФУНКЦИИ ДЛЯ РАБОТЫ С ОБЪЯВЛЕНИЯМИ =============
 
-def create_ad(seller_id, seller_geolocation, title, price, description, category):
-    """Создает новое объявление, возвращает ad_id или None"""
+def create_ad(seller_id, seller_geolocation, title, price, description, category_id):
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
             cur.execute("PRAGMA foreign_keys = ON")
             cur.execute("""
-                INSERT INTO ads (seller_id, seller_geolocation, title, price, description, category)
+                INSERT INTO ads (seller_id, seller_geolocation, title, price, description, category_id)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (seller_id, seller_geolocation, title, price, description, category))
+            """, (seller_id, seller_geolocation, title, price, description, category_id))
             con.commit()
             return cur.lastrowid
     except sq.Error as e:
@@ -218,17 +286,19 @@ def get_user_ads(user_id):
 
 
 def get_all_ads():
-    """Получает все объявления всех пользователей (для главной страницы)"""
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
             cur.execute("""
-                SELECT a.ad_id, a.title, a.price, a.description, a.category,
-                       u.user_nickname as seller_name,
-                       COALESCE(a.created_at, datetime('now')) as created_at
+                SELECT 
+                    a.ad_id, a.title, a.price, a.description,
+                    c.name AS category_name, c.slug AS category_slug, c.type AS category_type,
+                    u.user_nickname AS seller_name,
+                    COALESCE(a.created_at, datetime('now')) AS created_at
                 FROM ads a
+                JOIN categories c ON a.category_id = c.id
                 JOIN users u ON a.seller_id = u.user_id
-                ORDER BY created_at DESC
+                ORDER BY a.created_at DESC
             """)
             return cur.fetchall()
     except sq.Error as e:
@@ -402,3 +472,7 @@ def add_profile_photo(user_id, filename, original_name, mime_type, size):
 # Инициализация
 create_db()
 print("✅ База данных инициализирована")
+
+# Создаём начальные категории (1 раз при запуске)
+create_initial_categories()
+print("✅ Начальные категории созданы")
