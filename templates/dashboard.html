@@ -836,7 +836,7 @@
     <div id="message" class="message hidden"></div>
 
     <script>
-        let token = localStorage.getItem('auth_token');
+        let token = localStorage.getItem('token');
         let currentUserId = null;
         let currentPhotos = [];
         let galleryPhotos = [];
@@ -845,7 +845,7 @@
 
         // Проверка авторизации
         async function checkAuth() {
-            const token = localStorage.getItem('token');   // или 'auth_token' — выбери единое имя
+            const token = localStorage.getItem('token');
 
             if (!token) {
                 window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
@@ -864,7 +864,7 @@
                     await loadAds();
                     return true;
                 } else {
-                    localStorage.removeItem('token');   // или 'auth_token' — везде одинаково
+                    localStorage.removeItem('token');
                     window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
                     return false;
                 }
@@ -1236,7 +1236,7 @@
         }
 
         function logout() {
-            localStorage.removeItem('auth_token');
+            localStorage.removeItem('token');
             window.location.href = '/';
         }
 

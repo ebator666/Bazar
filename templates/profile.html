@@ -895,7 +895,7 @@
                 return { photoInput, uploadBtn, previewDiv };
             }
             async function checkAuth() {
-                const token = localStorage.getItem('token');   // или 'auth_token' — выбери единое имя
+                const token = localStorage.getItem('token');
 
                 if (!token) {
                     window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;

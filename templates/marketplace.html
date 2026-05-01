@@ -769,7 +769,7 @@
         }
 
         async function loadUserName(userId) {
-            const token = localStorage.getItem('auth_token');
+            const token = localStorage.getItem('token');
             try {
                 const response = await fetch(`/user/${userId}`, {
                     headers: { 'Authorization': 'Bearer ' + token }
@@ -784,7 +784,7 @@
         }
 
         function logout() {
-            localStorage.removeItem('auth_token');
+            localStorage.removeItem('token');
             window.location.href = '/';
         }
 
