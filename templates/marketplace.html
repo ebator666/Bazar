@@ -89,17 +89,18 @@
 
         .btn-primary {
             padding: 8px 20px;
-            background: #111;
-            color: #fff;
-            border: none;
-            border-radius: 16px;
-            font-size: 14px;
+            background: #111 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 16px !important;
+            font-size: 14px !important;
             cursor: pointer;
             transition: 0.2s ease;
+            text-decoration: none;
         }
 
         .btn-primary:hover {
-            background: #2a2a2a;
+            background: #2a2a2a !important;
             transform: translateY(-1px);
         }
 
@@ -438,7 +439,24 @@
             border-radius: 4px;
         }
 
+        .user-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            /* Расстояние между фото и именем */
+            text-decoration: none;
+            color: inherit;
+        }
 
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        }
 
         /* Мобильная версия */
         @media (max-width: 768px) {
@@ -560,8 +578,11 @@
                 <a href="/marketplace">Главная</a>
                 <div id="authSection">
                     <div class="user-menu">
-                        <span class="user-name" id="userName">Загрузка...</span>
                         <a href="/dashboard" class="btn-primary">Мои объявления</a>
+                        <a href="/profile" class="user-menu-link" id="userMenuContainer">
+                            <img src="https://via.placeholder.com/30" alt="Аватар" id="userAvatar" class="user-avatar">
+                            <span class="user-name" id="userName">Загрузка...</span>
+                        </a>
                         <button onclick="logout()" class="btn-outline">Выйти</button>
                     </div>
                 </div>
@@ -771,15 +792,29 @@
         async function loadUserName(userId) {
             const token = localStorage.getItem('token');
             try {
-                const response = await fetch(`/user/${userId}`, {
+                // API /api/profile, так как там информация о фото
+                const response = await fetch(`/api/profile`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
+
                 if (data.success) {
-                    document.getElementById('userName').textContent = data.username;
+                    // Обновляем имя
+                    document.getElementById('userName').textContent = data.name;
+
+                    //  ОБНОВЛЯЕМ ФОТО
+                    const userAvatar = document.getElementById('userAvatar');
+                    if (userAvatar) {
+                        if (data.profile_photo) {
+                            userAvatar.src = data.profile_photo;
+                        } else {
+                            // Дефолтное фото, если в БД пусто
+                            userAvatar.src = "https://via.placeholder.com/30/000/fff?text=👤";
+                        }
+                    }
                 }
             } catch (e) {
-                console.log('Ошибка загрузки имени');
+                console.error('Ошибка загрузки данных профиля:', e);
             }
         }
 
