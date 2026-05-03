@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 60px 20px 80px;
+            background: #fff;
+            /* чисто белый фон */
+        }
+
+        .sign-up {
+            width: 100%;
+            max-width: 480px;
+            padding: 36px 28px;
+            background: #fff;
+            /* форма на белом фоне */
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .welcome-text {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .server-message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+            font-size: 14px;
+            border-left: 4px solid transparent;
+        }
+
+        .server-message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left-color: #38a169;
+        }
+
+        .server-message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left-color: #e53e3e;
+        }
+
+        .form-group {
+            width: 100%;
+            margin: 24px 0;
+        }
+
+        .form-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 6px;
+            text-align: left;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0 15px;
+            height: 50px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: #f9f9f9;
+            font-size: 16px;
+            color: #111;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #111;
+            background: #fff;
+        }
+
+        .form-group input.error {
+            border-color: #e53e3e;
+            background: #fdf2f2;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .btn-register {
+            margin-top: 24px;
+            width: 100%;
+            height: 50px;
+            background: #111;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-register:hover {
+            background-color: #222;
+            transform: translateY(-2px);
+        }
+
+        .btn-register:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .signin-link {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 31px;
+        }
+
+        .signin-link a {
+            color: #111;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .signin-link a:hover {
+            color: #999;
+        }
+
+        /* ==== Шапка с логотипом BAZAR ==== */
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            background-color: white;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 12px 40px 0;
+            height: 70px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .top-header a#logoLink {
+            display: block;
+            text-decoration: none;
+        }
+
+        #logoContainer {
+            display: flex;
+            gap: 0.08em;
+            font-size: clamp(28px, 5.5vw, 52px);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .logo-letter {
+            opacity: 0;
+            transform: translateY(30px) scale(0.8);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .logo-letter.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        #logoContainer:hover .logo-letter {
+            animation: hoverPulse 0.4s ease-in-out;
+        }
+
+        #logoLink {
+            text-decoration: none !important;
+            color: #111 !important;
+            cursor: default;
+            /* или pointer, если хочешь стрелку */
+        }
+
+        /* насильно убираем стандартные состояния :link/:visited */
+        #logoLink:link,
+        #logoLink:visited,
+        #logoLink:hover,
+        #logoLink:active {
+            text-decoration: none !important;
+            color: #111 !important;
+        }
+
+        /* можно чуть уменьшить отступ совсем без жира */
+        #logoLink {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+    <header>
+        <div class="top-header">
+            <a href="/marketplace" id="logoLink" class="logo">
+                <div id="logoContainer"></div>
+            </a>
+        </div>
+    </header>
+
+    <div class="sign-up">
+        <h2 class="welcome-text">Регистрируйся и вкушай плоды Bazar</h2>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label class="form-title" for="username">Имя пользователя</label>
+                <input type="text" id="username" name="username" required>
+                <div class="error-message" id="usernameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-title" for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <div class="error-message" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-title" for="password">Пароль</label>
+                <input type="password" id="password" name="password" required>
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-title" for="confirmPassword">Подтвердите пароль</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <div class="error-message" id="confirmError"></div>
+            </div>
+
+            <button type="submit" class="btn-register" id="registerBtn">Зарегистрироваться</button>
+
+            <div class="signin-link">
+                Уже есть аккаунт? <a id="have-acc" href="/signin">Войти</a>
+            </div>
+        </form>
+
+        <div id="serverMessage" class="server-message"></div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            clearErrors();
+
+            let isValid = true;
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Валидация имени
+            if (username.length < 3) {
+                showError('usernameError', 'Минимум 3 символа');
+                isValid = false;
+            }
+
+            // Валидация email
+            const emailRegex = /^[^\s@]+@mai\.education$/;
+            if (!emailRegex.test(email)) {
+                showError('emailError', 'Введите email вида name@mai.education');
+                isValid = false;
+            }
+
+            // Валидация пароля
+            if (password.length < 8 || password.length > 24) {
+                showError('passwordError', 'Пароль должен быть от 8 до 24 символов');
+                isValid = false;
+            }
+
+            // Проверка совпадения
+            if (password !== confirmPassword) {
+                showError('confirmError', 'Пароли не совпадают');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Отправка на сервер
+            try {
+                const btn = document.getElementById('registerBtn');
+                btn.textContent = 'Отправка...';
+                btn.disabled = true;
+
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('email', email);
+                formData.append('password', password);
+
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showServerMessage('success', result.message || 'Регистрация успешна! Перенаправление...');
+                    document.getElementById('registerForm').reset();
+
+                    // ✅ НОВЫЕ 3 СТРОКИ:
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user_id', result.user_id);
+
+                    setTimeout(() => {
+                        window.location.href = '/profile';  // ← Твой профиль
+                    }, 1500);
+
+                } else {
+                    showServerMessage('error', result.error || 'Ошибка при регистрации');
+                }
+
+            } catch (error) {
+                showServerMessage('error', 'Ошибка соединения с сервером');
+                console.error('Error:', error);
+            } finally {
+                const btn = document.getElementById('registerBtn');
+                btn.textContent = 'Зарегистрироваться';
+                btn.disabled = false;
+            }
+        });
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+        }
+
+        function showServerMessage(type, text) {
+            const msgDiv = document.getElementById('serverMessage');
+            msgDiv.textContent = text;
+            msgDiv.className = `server-message ${type}`;
+            msgDiv.style.display = 'block';
+
+            // Не скрываем автоматически если это успех с перенаправлением
+            if (type !== 'success') {
+                setTimeout(() => {
+                    msgDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Останавливаем стандартную отправку
+
+            // Очищаем сообщения
+            clearErrors();
+
+            // Получаем значения полей
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+
+            let isValid = true;
+
+            // Валидация email
+            const emailRegex = /^[^\s@]+@mai\.education$/;
+            if (!emailRegex.test(email)) {
+                showError('emailError', 'Введите email вида name@mai.education');
+                isValid = false;
+            }
+
+            // Валидация пароля
+            if (password.length < 8 || password.length > 24) {
+                showError('passwordError', 'Пароль должен содержать от 8 до 24 символов');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Отправка на сервер
+            try {
+                const btn = document.getElementById('loginBtn');
+                btn.textContent = 'Вход...';
+                btn.disabled = true;
+
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('password', password);
+                formData.append('remember', remember);
+
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showServerMessage('success', 'Вход выполнен успешно! Перенаправление...');
+
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user_id', result.user_id);
+
+                    const params = new URLSearchParams(window.location.search);
+                    const nextPage = params.get('next');
+                    const tab = params.get('tab');
+
+                    if (nextPage) {
+                        window.location.href = nextPage;
+                    } else {
+                        window.location.href = '/profile';
+                    }
+                } else {
+                    showServerMessage('error', result.error || 'Неверный email или пароль');
+                }
+
+            } catch (error) {
+                showServerMessage('error', 'Ошибка соединения с сервером');
+                console.error('Error:', error);
+            } finally {
+                const btn = document.getElementById('loginBtn');
+                btn.textContent = 'Войти';
+                btn.disabled = false;
+            }
+        });
+
+        // Функция показа ошибок
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+
+            // Подсвечиваем поле
+            const inputId = elementId.replace('Error', '');
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.classList.add('error');
+            }
+        }
+
+        // Функция очистки ошибок
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+                el.classList.remove('show');
+            });
+
+            document.querySelectorAll('input').forEach(input => {
+                input.classList.remove('error');
+            });
+        }
+
+        // Функция показа серверных сообщений
+        function showServerMessage(type, text) {
+            const msgDiv = document.getElementById('serverMessage');
+            msgDiv.textContent = text;
+            msgDiv.className = `server-message ${type}`;
+            msgDiv.style.display = 'block';
+
+            // Автоматически скрываем через 5 секунд (кроме успешного входа)
+            if (type !== 'success') {
+                setTimeout(() => {
+                    msgDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Очистка ошибок при вводе
+        document.getElementById('email').addEventListener('input', function () {
+            this.classList.remove('error');
+            document.getElementById('emailError').classList.remove('show');
+        });
+
+        document.getElementById('password').addEventListener('input', function () {
+            this.classList.remove('error');
+            document.getElementById('passwordError').classList.remove('show');
+        });
+
+        // Добавляем обработку Enter
+        document.getElementById('password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoContainer = document.getElementById("logoContainer");
+            const letters = ["B", "A", "Z", "A", "R"];
+
+            let animationId;
+            let startTime;
+            let isVisible = false;
+
+            // Создание отдельных букв BAZAR
+            function initLetters() {
+                logoContainer.innerHTML = "";
+                letters.forEach((letter) => {
+                    const span = document.createElement("span");
+                    span.textContent = letter;
+                    span.className = "logo-letter";
+                    logoContainer.appendChild(span);
+                });
+            }
+
+            // Появление букв
+            function showLetters() {
+                const letterElements = document.querySelectorAll(".logo-letter");
+                letterElements.forEach((el, i) => {
+                    setTimeout(() => el.classList.add("visible"), i * 150);
+                });
+            }
+
+            // Волновой полёт (для 5 букв)
+            function animate(currentTime = performance.now()) {
+                if (!isVisible) return;
+
+                const elapsed = currentTime - startTime;
+                const letterElements = document.querySelectorAll(".logo-letter");
+
+                letters.forEach((_, i) => {
+                    if (letterElements[i]) {
+                        const xWave = Math.sin(elapsed * 0.0012 + i * 0.9) * (0.8 + i * 0.3);
+                        const yWave = Math.sin(elapsed * 0.0018 + i * 1.4) * (1.2 + i * 0.3);
+                        const scale = 1 + Math.sin(elapsed * 0.002 + i) * 0.05;
+                        letterElements[i].style.transform =
+                            `scale(${scale}) translate(${xWave}px, ${yWave}px)`;
+                    }
+                });
+
+                animationId = requestAnimationFrame(animate);
+            }
+
+            // Запуск
+            initLetters();
+
+            setTimeout(() => {
+                isVisible = true;
+                showLetters();
+                startTime = performance.now();
+                animate();
+            }, 800);
+
+            // Очистка
+            window.addEventListener("beforeunload", () => {
+                if (animationId) cancelAnimationFrame(animationId);
+            });
+        });
+    </script>
+</body>
+
+</html>
