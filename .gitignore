@@ -2,3 +2,5 @@ test.db
 __pycache__/
 *.pyc
 .vscode/settings.json
+static/
+README.md
