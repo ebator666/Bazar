@@ -82,63 +82,85 @@ def create_db():
         )""")
 
 def create_initial_categories():
-    categories_data = [
-        # type = goods
-        (None, "Товары", "goods", "goods"),
-        (1, "Техника", "electronics", "goods"),
-        (1, "Одежда", "clothes", "goods"),
-        (1, "Мебель", "furniture", "goods"),
-        (1, "Книги", "books", "goods"),
-        (1, "Другое", "other", "goods"),
-
-        # type = housing
-        (None, "Жильё", "housing", "housing"),
-        (7, "Поиск соседей", "search_roommate", "housing"),
-        (7, "Аренда комнаты", "room_rent", "housing"),
-
-        # type = services
-        (None, "Услуги", "services", "services"),
-        (9, "Репетиторство", "tutoring", "services"),
-        (9, "Программирование", "programming", "services"),
-        (9, "Помощь с курсовыми", "coursework_help", "services"),
-
-        # type = exchange
-        (None, "Обмен", "exchange", "exchange"),
-        (13, "Обмен вещами", "item_exchange", "exchange"),
-        (13, "Отдам даром", "giveaway", "exchange"),
-
-        # type = study
-        (None, "Учеба", "study", "study"),
-        (16, "Конспекты", "notes", "study"),
-        (16, "Учебники", "textbooks", "study"),
-        (16, "Подготовка к экзаменам", "exam_prep", "study"),
-
-        # type = work
-        (None, "Работа / Подработка", "work", "work"),
-        (20, "Стажировки", "internship", "work"),
-        (20, "Волонтёрство", "volunteer", "work"),
-        (20, "Вакансии", "vacancy", "work"),
-
-        # type = transport
-        (None, "Транспорт", "transport", "transport"),
-        (24, "Авто", "car", "transport"),
-        (24, "Велосипеды", "bicycle", "transport"),
-
-        # type = events
-        (None, "События", "events", "events"),
-        (27, "Мероприятия", "event", "events"),
-        (27, "Студклубы", "club", "events"),
+    parents = [
+        ("Товары", "goods", "goods"),
+        ("Жильё", "housing", "housing"),
+        ("Услуги", "services", "services"),
+        ("Обмен", "exchange", "exchange"),
+        ("Учеба", "study", "study"),
+        ("Работа / Подработка", "work", "work"),
+        ("Транспорт", "transport", "transport"),
+        ("События", "events", "events"),
     ]
+
+    children = {
+        "goods": [
+            ("Техника", "electronics"),
+            ("Одежда", "clothes"),
+            ("Мебель", "furniture"),
+            ("Книги", "books"),
+            ("Другое", "other"),
+        ],
+        "housing": [
+            ("Поиск соседей", "search_roommate"),
+            ("Аренда комнаты", "room_rent"),
+        ],
+        "services": [
+            ("Репетиторство", "tutoring"),
+            ("Программирование", "programming"),
+            ("Помощь с курсовыми", "coursework_help"),
+        ],
+        "exchange": [
+            ("Обмен вещами", "item_exchange"),
+            ("Отдам даром", "giveaway"),
+        ],
+        "study": [
+            ("Конспекты", "notes"),
+            ("Учебники", "textbooks"),
+            ("Подготовка к экзаменам", "exam_prep"),
+        ],
+        "work": [
+            ("Стажировки", "internship"),
+            ("Волонтёрство", "volunteer"),
+            ("Вакансии", "vacancy"),
+        ],
+        "transport": [
+            ("Авто", "car"),
+            ("Велосипеды", "bicycle"),
+        ],
+        "events": [
+            ("Мероприятия", "event"),
+            ("Студклубы", "club"),
+        ],
+    }
 
     with sq.connect("test.db", check_same_thread=False) as con:
         cur = con.cursor()
         cur.execute("PRAGMA foreign_keys = ON")
-        for parent_id, name, slug, cat_type in categories_data:
+
+        for name, slug, cat_type in parents:
             cur.execute(
-                "INSERT OR IGNORE INTO categories (parent_id, name, slug, type) VALUES (?, ?, ?, ?)",
-                (parent_id, name, slug, cat_type),
+                "INSERT OR IGNORE INTO categories (name, slug, parent_id, type) VALUES (?, ?, ?, ?)",
+                (name, slug, None, cat_type),
             )
-        con.commit()     
+
+        con.commit()
+
+        cur.execute("SELECT id, slug FROM categories WHERE parent_id IS NULL")
+        parent_rows = cur.fetchall()
+        parent_map = {slug: cat_id for cat_id, slug in parent_rows}
+
+        for parent_slug, items in children.items():
+            parent_id = parent_map.get(parent_slug)
+            if not parent_id:
+                continue
+            for name, slug in items:
+                cur.execute(
+                    "INSERT OR IGNORE INTO categories (name, slug, parent_id, type) VALUES (?, ?, ?, ?)",
+                    (name, slug, parent_id, parent_slug),
+                )
+
+        con.commit()  
 
 # Создаем папку для фото
 PHOTO_FOLDER = 'static/uploads'
@@ -268,16 +290,18 @@ def create_ad(seller_id, seller_geolocation, title, price, description, category
 
 
 def get_user_ads(user_id):
-    """Получает все объявления пользователя"""
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
             cur.execute("""
-                SELECT ad_id, title, price, description, category, 
-                       COALESCE(created_at, datetime('now')) as created_at
-                FROM ads
-                WHERE seller_id = ?
-                ORDER BY created_at DESC
+                SELECT 
+                    a.ad_id, a.title, a.price, a.description,
+                    c.name AS category_name,
+                    COALESCE(a.created_at, datetime('now')) as created_at
+                FROM ads a
+                JOIN categories c ON a.category_id = c.id
+                WHERE a.seller_id = ?
+                ORDER BY a.created_at DESC
             """, (user_id,))
             return cur.fetchall()
     except sq.Error as e:
@@ -307,15 +331,25 @@ def get_all_ads():
 
 
 def get_ad_by_id(ad_id):
-    """Получает объявление по ID (без данных продавца)"""
+    """Получает объявление по ID"""
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
             cur.execute("""
-                SELECT ad_id, seller_id, title, price, description, category, 
-                       COALESCE(created_at, datetime('now')) as created_at
-                FROM ads
-                WHERE ad_id = ?
+                SELECT 
+                    a.ad_id,
+                    a.seller_id,
+                    a.title,
+                    a.price,
+                    a.description,
+                    a.category_id,
+                    c.name AS category_name,
+                    c.slug AS category_slug,
+                    c.type AS category_type,
+                    COALESCE(a.created_at, datetime('now')) AS created_at
+                FROM ads a
+                JOIN categories c ON a.category_id = c.id
+                WHERE a.ad_id = ?
             """, (ad_id,))
             return cur.fetchone()
     except sq.Error as e:
@@ -324,16 +358,28 @@ def get_ad_by_id(ad_id):
 
 
 def get_ad_with_seller(ad_id):
-    """Получает объявление с данными продавца (для детальной страницы)"""
+    """Получает объявление с данными продавца"""
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
             cur.execute("""
-                SELECT a.ad_id, a.title, a.price, a.description, a.category,
-                       a.seller_id, u.user_nickname, u.email, u.user_geolocation,
-                       COALESCE(a.created_at, datetime('now')) as created_at
+                SELECT 
+                    a.ad_id,
+                    a.title,
+                    a.price,
+                    a.description,
+                    a.category_id,
+                    c.name AS category_name,
+                    c.slug AS category_slug,
+                    c.type AS category_type,
+                    a.seller_id,
+                    u.user_nickname,
+                    u.email,
+                    u.user_geolocation,
+                    COALESCE(a.created_at, datetime('now')) AS created_at
                 FROM ads a
                 JOIN users u ON a.seller_id = u.user_id
+                JOIN categories c ON a.category_id = c.id
                 WHERE a.ad_id = ?
             """, (ad_id,))
             return cur.fetchone()
@@ -342,16 +388,15 @@ def get_ad_with_seller(ad_id):
         return None
 
 
-def update_ad(ad_id, title, price, description, category):
-    """Обновляет данные объявления"""
+def update_ad(ad_id, title, price, description, category_id):
     try:
         with sq.connect("test.db", check_same_thread=False) as con:
             cur = con.cursor()
             cur.execute("""
                 UPDATE ads
-                SET title = ?, price = ?, description = ?, category = ?
+                SET title = ?, price = ?, description = ?, category_id = ?
                 WHERE ad_id = ?
-            """, (title, price, description, category, ad_id))
+            """, (title, price, description, category_id, ad_id))
             con.commit()
             return cur.rowcount > 0
     except sq.Error as e:

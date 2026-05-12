@@ -738,13 +738,13 @@
             container.innerHTML = filteredAds.map(ad => `
                 <a href="/ad/${ad.id}" class="ad-card">
                     <div class="ad-image">
-                        ${ad.first_photo ?
-                    `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">` :
-                    `<div class="no-image">📷</div>`
+                        ${ad.first_photo
+                    ? `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">`
+                    : `<div class="no-image">📷</div>`
                 }
                     </div>
                     <div class="ad-info">
-                        <span class="ad-category">${escapeHtml(ad.category)}</span>
+                        <span class="ad-category">${escapeHtml(ad.category_name || ad.category || '')}</span>
                         <h3 class="ad-title">${escapeHtml(ad.title)}</h3>
                         <div class="ad-price">${formatPrice(ad.price)} ₽</div>
                         <div class="ad-seller">👤 ${escapeHtml(ad.seller_name)}</div>

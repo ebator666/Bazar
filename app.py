@@ -117,8 +117,8 @@ def get_ad_detail_route(ad_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # Получение объявлений пользователя
-@app.route('/api/ads', methods=['GET'])
-def get_ads():
+@app.route('/api/user-ads', methods=['GET'])  # для пользователя
+def get_user_ads_route():
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     
     if not token:
@@ -154,7 +154,7 @@ def get_ad_photos_route(ad_id):
     result = [{'id': p[0], 'url': p[1], 'order': p[2]} for p in photos]
     return jsonify({'success': True, 'photos': result})
 
-@app.route('/api/ads', methods=['POST'])
+@app.route('/api/user-ads', methods=['POST'])
 def create_ad_route():
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     if not token:
@@ -167,7 +167,7 @@ def create_ad_route():
     title = request.form.get('title', '').strip()
     price = request.form.get('price')
     description = request.form.get('description', '').strip()
-    category = request.form.get('category', '').strip()  # например: "Техника", "Репетиторство"
+    category = request.form.get('category_id', '').strip()  # например: "Техника", "Репетиторство"
 
     # Валидация
     if not title or len(title) < 3:
