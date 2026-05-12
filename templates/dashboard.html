@@ -1110,6 +1110,8 @@
             }
         }
 
+
+
         // Создание объявления
         async function createAd(formData) {
             try {
@@ -1239,7 +1241,7 @@
             }
 
             if (adId && adId !== '') {
-                updateAd(parseInt(adId), { title, price: parseInt(price), categoryId, description });
+                updateAd(parseInt(adId), { title, price: parseInt(price), category_id: categoryId, description });
             } else {
                 const formData = new FormData();
                 formData.append('title', title);

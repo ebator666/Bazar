@@ -249,8 +249,8 @@ def update_ad_route(ad_id):
     data = request.json
     title = data.get('title', '').strip()
     price = data.get('price')
+    category = data.get('category_id', '').strip()
     description = data.get('description', '').strip()
-    category = data.get('category', '').strip()
     
     if not title or len(title) < 3:
         return jsonify({'success': False, 'error': 'Название должно быть минимум 3 символа'}), 400

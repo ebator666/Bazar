@@ -473,6 +473,58 @@
             transform: translateY(0);
         }
 
+        .ad-card {
+            display: flex;
+            align-items: flex-start;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .ad-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .ad-card .ad-image {
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+            overflow: hidden;
+            border-right: 1px solid #eee;
+        }
+
+        .ad-card .ad-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ad-card .ad-info {
+            padding: 12px;
+            flex: 1;
+        }
+
+        .ad-card .ad-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+
+        .ad-card .ad-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: black;
+        }
+
+        .ad-card .ad-date {
+            font-size: 12px;
+            color: #999;
+        }
+
         @media (max-width: 767px) {
             body {
                 padding: 120px 20px 40px;
@@ -985,6 +1037,76 @@
                     window.location.href = "/signin";
                 }
             }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/signin';
+            }
+
+            // Загрузка объявлений в профиле
+            async function loadUserAds() {
+                const container = document.querySelector('.ads-list');
+                const emptyBlock = document.querySelector('.ads-empty');
+
+                try {
+                    const response = await fetch('/api/user-ads', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await response.json();
+
+                    if (data.success && data.ads && data.ads.length > 0) {
+                        emptyBlock.style.display = 'none';
+                        container.innerHTML = data.ads.map(ad => `
+                <a href="/ad/${ad.id}" class="ad-card" data-id="${ad.id}">
+                    <div class="ad-image">
+                        ${ad.first_photo
+                                ? `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">`
+                                : `<div class="no-image">📷</div>`
+                            }
+                    </div>
+                    <div class="ad-info">
+                        <span class="ad-category">${escapeHtml(ad.category || 'Без категории')}</span>
+                        <h3 class="ad-title">${escapeHtml(ad.title)}</h3>
+                        <div class="ad-price">${formatPrice(ad.price)} ₽</div>
+                        <div class="ad-date">📅 ${formatDate(ad.created_at)}</div>
+                    </div>
+                </a>
+            `).join('');
+                    } else {
+                        container.innerHTML = '';
+                        emptyBlock.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки объявлений в профиле:', error);
+                    emptyBlock.innerHTML = `
+            <span class="empty-icon">❌</span>
+            <p class="empty-text">Ошибка загрузки объявлений</p>
+        `;
+                }
+            }
+
+            // Переиспользуем функции из dashboard/modal
+            function formatPrice(price) {
+                return new Intl.NumberFormat('ru-RU').format(price);
+            }
+
+            function formatDate(dateStr) {
+                if (!dateStr) return 'Недавно';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('ru-RU', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Запускаем загрузку объявлений
+            loadUserAds();
 
             function logout(event) {
                 event.preventDefault();
