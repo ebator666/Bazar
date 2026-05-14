@@ -45,7 +45,7 @@
 
         .nav-links {
             display: flex;
-            gap: 30px;
+            gap: 24px;
             align-items: center;
         }
 
@@ -53,16 +53,11 @@
             text-decoration: none;
             color: #333;
             font-weight: 500;
-            transition: color 0.2s;
+            transition: 0.2s ease;
         }
 
         .nav-links a:hover {
-            color: black;
-        }
-
-        .nav-links a.active {
-            color: black;
-            font-weight: 600;
+            color: #111;
         }
 
         .header-actions {
@@ -693,6 +688,22 @@
             overflow: hidden;
             border: 2px solid #e0e0e0;
         }
+        .btn-primary {
+            padding: 8px 20px;
+            background: #111 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 16px !important;
+            font-size: 14px !important;
+            cursor: pointer;
+            transition: 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background: #2a2a2a !important;
+            transform: translateY(-1px);
+        }
 
         .existing-photo-item img {
             width: 100%;
@@ -749,6 +760,12 @@
             font-size: clamp(22px, 5.2vw, 32px);
             font-weight: 900;
             line-height: 1;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .logo-letter {
@@ -829,12 +846,10 @@
                     <div id="logoContainer"></div>
                 </a>
             </div>
-
-            <div class="nav-links">
-                <a href="/marketplace" class="active">📱 Все объявления</a>
-                <a href="/dashboard">📦 Мои объявления</a>
-            </div>
             <div class="header-actions">
+                <div class="nav-links">
+                <a href="/marketplace" class="btn-primary">Все объявления</a>
+                </div>
                 <a href="/profile" class="user-menu-link" id="userMenuContainer"
                     style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;">
                     <img src="https://via.placeholder.com/45" alt="Аватар" id="userAvatar" class="user-avatar"
