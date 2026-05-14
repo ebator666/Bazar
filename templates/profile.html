@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль студента</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;900&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family:
+                "Inter",
+                -apple-system,
+                sans-serif;
+            background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+            color: #111;
+            min-height: 100vh;
+            padding: 100px 20px 60px 20px;
+            text-align: left;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 24px 40px;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(25px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            /* ← Левое меню слева, логотип+правое справа */
+            gap: 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .nav-left {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            border-radius: 8px;
+            transition: 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 0, 0, 0.08);
+            color: #000;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.08);
+            color: #999;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: #111;
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .logout {
+            color: #666;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .logout:hover {
+            color: #111;
+        }
+
+        .post-btn {
+            padding: 8px 16px;
+            background: #111;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 8px;
+            transition: 0.2s ease;
+        }
+
+        .post-btn:hover {
+            background: #2a2a2a;
+            transform: translateY(-1px);
+        }
+
+        .logo-section {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        #logoContainer {
+            display: flex;
+            gap: 0.08em;
+            font-size: clamp(28px, 5.5vw, 52px);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .logo-letter {
+            opacity: 0;
+            transform: translateY(30px) scale(0.8);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .logo-letter.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        #logoContainer:hover .logo-letter {
+            animation: hoverPulse 0.4s ease-in-out;
+        }
+
+        @keyframes hoverPulse {
+
+            0%,
+            100% {
+                transform: scale(1) translate(0, 0);
+            }
+
+            50% {
+                transform: scale(1.08) translate(0, -2px);
+            }
+        }
+
+        #subtitle {
+            opacity: 0;
+            font-size: clamp(20px, 1.4vw, 13px);
+            font-weight: 1000;
+            color: #030303;
+            letter-spacing: 0.05em;
+            transition: all 0.7s ease;
+            transform: translateY(5px);
+            padding-bottom: 10px;
+        }
+
+        #subtitle.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .page {
+            max-width: none;
+            margin: 0;
+            padding: 0 0 0 0;
+        }
+
+        .profile-modern {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            max-width: 620px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .profile-modern:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        .profile-meta {
+            flex: 1;
+        }
+
+        .profile-meta h1 {
+            font-size: clamp(28px, 5vw, 36px);
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            background: linear-gradient(135deg, #111 0%, #333 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-badge {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin: 0 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .profile-meta .profile-age {
+            color: #888;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 620px 1fr;
+            justify-content: start;
+            gap: 70px;
+            align-items: stretch;
+            margin: 20px 0;
+            padding: 0 20px 0 0;
+        }
+
+        /* Мои объявления  */
+        .ads-modern {
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            height: fit-content;
+            height: 100%;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .ads-modern:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .ads-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ads-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #111 0%, #333 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ads-btn-modern {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 16px;
+            background: rgba(17, 17, 17, 0.9);
+            color: white;
+            font-size: 24px;
+            font-weight: 200;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(17, 17, 17, 0.3);
+        }
+
+        .ads-btn-modern:hover {
+            transform: translateY(-2px) scale(1.1);
+            background: rgba(0, 0, 0, 1);
+            box-shadow: 0 16px 32px rgba(17, 17, 17, 0.4);
+        }
+
+        .ads-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-icon {
+            display: block;
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 0 8px 0;
+        }
+
+        .empty-subtitle {
+            font-size: 14px;
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .ads-list {
+            min-height: 200px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            transition: 0.2s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 4px;
+            line-height: 1.3;
+            hyphens: auto;
+            /* Перенос слов */
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            color: #111;
+            text-decoration: none;
+            border-radius: 16px;
+            font-weight: 500;
+            font-size: 16px;
+            transition: 0.2s ease;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .action-link:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateX(4px);
+        }
+
+        .edit-btn-modern {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(17, 17, 17, 0.9);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(17, 17, 17, 0.3);
+        }
+
+        .edit-btn-modern:hover {
+            transform: translateY(-2px) scale(1.02);
+            background: rgba(0, 0, 0, 1);
+            box-shadow: 0 16px 32px rgba(17, 17, 17, 0.4);
+        }
+
+        .profile-contacts a:hover {
+            text-decoration: underline;
+        }
+
+        .edit-btn {
+            margin-top: 10px;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 22px;
+            background: #111;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s ease;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            background: #2a2a2a;
+        }
+
+        .edit-btn:active {
+            transform: translateY(0);
+        }
+
+        .ad-card {
+            display: flex;
+            align-items: flex-start;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .ad-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .ad-card .ad-image {
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+            overflow: hidden;
+            border-right: 1px solid #eee;
+        }
+
+        .ad-card .ad-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ad-card .ad-info {
+            padding: 12px;
+            flex: 1;
+        }
+
+        .ad-card .ad-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+
+        .ad-card .ad-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: black;
+        }
+
+        .ad-card .ad-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        @media (max-width: 767px) {
+            body {
+                padding: 120px 20px 40px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                justify-content: center;
+            }
+
+            .logo-section {
+                position: static;
+                transform: none;
+                order: 1;
+            }
+
+            #logoContainer {
+                font-size: clamp(32px, 16vw, 56px);
+            }
+
+            .nav-left {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-right {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-link {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            .icon-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .post-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .profile {
+                max-width: 100%;
+            }
+
+            .edit-btn {
+                width: 100%;
+            }
+
+            .profile-modern {
+                padding: 28px 20px;
+                margin: 0 4px;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                padding: 16px 0;
+            }
+
+            .ads-modern {
+                padding: 28px 20px;
+
+            }
+        }
+
+        .edit-actions {
+            display: none;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .edit-mode .edit-actions {
+            display: flex;
+        }
+
+        .profile-modern .edit-actions {
+            display: none;
+        }
+
+        .profile-modern.edit-mode .edit-actions {
+            display: flex;
+        }
+    </style>
+    <style>
+        .edit-mode .profile-display {
+            display: none;
+        }
+
+        .edit-mode .profile-edit {
+            display: block;
+        }
+
+        .profile-edit {
+            display: none;
+            margin: 1rem 0;
+        }
+
+        .profile-edit input,
+        .profile-edit textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .profile-edit textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .stat-input {
+            display: block;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="nav-left">
+            <a href="/marketplace" class="nav-link">Главная</a>
+        </nav>
+
+        <div class="logo-section">
+            <div id="logoContainer"></div>
+        </div>
+
+        <nav class="nav-right">
+            <a href="/signin" class="nav-link logout" onclick="logout(event)">Выйти из профиля</a>
+        </nav>
+    </header>
+
+    <main class="page">
+        <div class="dashboard">
+            <section class="profile-modern">
+                <div class="profile-header">
+                    <img src="https://via.placeholder.com/140x140/000/fff?text=👤" alt="Фото профиля"
+                        class="profile-avatar">
+
+                    <div class="profile-meta profile-display">
+                        <h1 class="profile-name" data-field="name"></h1>
+                        <p class="profile-badge">Студенческий профиль</p>
+                        <p class="profile-age" data-field="age"></p>
+                    </div>
+
+                    <div class="profile-meta profile-edit">
+                        <input type="text" data-field="name" value="" placeholder="Имя">
+                        <p class="profile-badge">Студенческий профиль</p>
+                        <input type="text" data-field="age" value="" placeholder="Возраст">
+                    </div>
+
+                    <button class="edit-btn-modern" id="editToggle" type="button">
+                        Редактировать </button>
+                </div>
+
+                <div class="profile-stats profile-display">
+                    <div class="stat-item">
+                        <span class="stat-number" data-field="direction"></span>
+                        <span class="stat-label">Направление</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-field="student_group"></span>
+                        <span class="stat-label">Группа</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-field="dormitory"></span>
+                        <span class="stat-label">Общежитие</span>
+                    </div>
+                </div>
+
+                <div class="profile-stats profile-edit">
+                    <div class="stat-item">
+                        <input type="text" class="stat-input" data-field="direction" value="" placeholder="Направление">
+                        <span class="stat-label">Направление</span>
+                    </div>
+                    <div class="stat-item">
+                        <input type="text" class="stat-input" data-field="student_group" value="" placeholder="Группа">
+                        <span class="stat-label">Группа</span>
+                    </div>
+                    <div class="stat-item">
+                        <input type="text" class="stat-input" data-field="dormitory" value="" placeholder="Общежитие">
+                        <span class="stat-label">Общежитие</span>
+                    </div>
+                </div>
+
+                <div class="profile-actions profile-display">
+                    <a href="#" class="action-link" data-field="phone">
+                        <span>📞</span>
+                    </a>
+                    <a href="#" class="action-link" data-field="email">
+                        <span>✉️</span>
+                    </a>
+                </div>
+
+                <div class="profile-actions profile-edit">
+                    <input type="tel" data-field="phone" value="" placeholder="Телефон">
+                    <input type="email" data-field="email" value="" placeholder="Email">
+                </div>
+
+                <div class="edit-actions profile-edit">
+                    <button class=" edit-btn-modern" id="saveBtn" type="button">Сохранить</button>
+                    <button class="nav-link" id="cancelBtn" type="button">Отмена</button>
+                </div>
+            </section>
+
+            <section class="ads-modern">
+                <div class="ads-header">
+                    <h2 class="ads-title">Мои объявления</h2>
+                    <a href="/dashboard">
+                        <button class="ads-btn-modern" type="button">+</button>
+                    </a>
+                </div>
+
+                <div class="ads-empty">
+                    <span class="empty-icon">📭</span>
+                    <p class="empty-text">У вас пока нет объявлений</p>
+                    <p class="empty-subtitle">Нажмите "+" чтобы создать первое</p>
+                </div>
+
+                <div class="ads-list"></div>
+            </section>
+        </div>
+    </main>
+
+    <script> // БЛОКИРОВКА ДО ЗАГРУЗКИ (критично!)
+        if (!localStorage.getItem('token')) {
+            window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+        }
+
+        // Защита от bfcache
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || !localStorage.getItem('token')) {
+                localStorage.removeItem('token');
+                sessionStorage.clear();
+                window.location.replace('/signin');
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const editToggle = document.getElementById("editToggle");
+            const saveBtn = document.getElementById("saveBtn");
+            const cancelBtn = document.getElementById("cancelBtn");
+            const profileSection = document.querySelector(".profile-modern");
+
+            const viewFields = {
+                name: document.querySelector('[data-field="name"].profile-name'),
+                age: document.querySelector('[data-field="age"].profile-age'),
+                direction: document.querySelector('[data-field="direction"].stat-number'),
+                student_group: document.querySelector(
+                    '[data-field="student_group"].stat-number',
+                ),
+                dormitory: document.querySelector('[data-field="dormitory"].stat-number'),
+                phone: document.querySelector(
+                    '.profile-actions.profile-display [data-field="phone"]',
+                ),
+                email: document.querySelector(
+                    '.profile-actions.profile-display [data-field="email"]',
+                ),
+            };
+
+            const editFields = {
+                name: document.querySelector('.profile-edit [data-field="name"]'),
+                age: document.querySelector('.profile-edit [data-field="age"]'),
+                direction: document.querySelector('.profile-edit [data-field="direction"]'),
+                student_group: document.querySelector(
+                    '.profile-edit [data-field="student_group"]',
+                ),
+                dormitory: document.querySelector('.profile-edit [data-field="dormitory"]'),
+                phone: document.querySelector('.profile-edit [data-field="phone"]'),
+                email: document.querySelector('.profile-edit [data-field="email"]'),
+            };
+
+            let originalData = {};
+            let currentPhotoFile = null; //  НОВОЕ: для фото
+
+            const clean = (v) => (v == null ? "" : String(v));
+
+
+
+            function getFormData() {
+                return {
+                    name: editFields.name.value.trim(),
+                    age: editFields.age.value.trim(),
+                    direction: editFields.direction.value.trim(),
+                    student_group: editFields.student_group.value.trim(),
+                    dormitory: editFields.dormitory.value.trim(),
+                    phone: editFields.phone.value.trim(),
+                    email: editFields.email.value.trim(),
+                };
+            }
+
+            function setEditData(data) {
+                editFields.name.value = clean(data.name);
+                editFields.age.value = clean(data.age);
+                editFields.direction.value = clean(data.direction);
+                editFields.student_group.value = clean(data.student_group);
+                editFields.dormitory.value = clean(data.dormitory);
+                editFields.phone.value = clean(data.phone);
+                editFields.email.value = clean(data.email);
+
+                editFields.name.placeholder = "Имя";
+                editFields.age.placeholder = "Возраст";
+                editFields.direction.placeholder = "Направление";
+                editFields.student_group.placeholder = "Группа";
+                editFields.dormitory.placeholder = "Общежитие";
+                editFields.phone.placeholder = "Телефон";
+                editFields.email.placeholder = "Email";
+            }
+
+            function setViewData(data) {
+                console.log("setViewData data.name:", data.name);
+                viewFields.name.textContent = clean(data.name);
+                viewFields.age.textContent = clean(data.age);
+                viewFields.direction.textContent = clean(data.direction);
+                viewFields.student_group.textContent = clean(data.student_group);
+                viewFields.dormitory.textContent = clean(data.dormitory);
+
+                viewFields.phone.href = data.phone ? `tel:${data.phone}` : "#";
+                viewFields.phone.innerHTML = `<span>📞</span> ${clean(data.phone)}`;
+
+                viewFields.email.href = data.email ? `mailto:${data.email}` : "#";
+                viewFields.email.innerHTML = `<span>✉️</span> ${clean(data.email)}`;
+            }
+
+            function saveOriginalData() {
+                originalData = getFormData();
+            }
+
+            //  НОВОЕ: Инициализация фото
+            function initPhotoUpload() {
+                const profileHeader = document.querySelector(".profile-header");
+                const profileAvatar = document.querySelector(".profile-avatar");
+
+                // Создаем input file
+                const photoInput = document.createElement("input");
+                photoInput.id = "photoInput";
+                photoInput.type = "file";
+                photoInput.accept = "image/*";
+                photoInput.style.display = "none";
+                profileHeader.appendChild(photoInput);
+
+                // Создаем кнопку
+                const uploadBtn = document.createElement("label");
+                uploadBtn.htmlFor = "photoInput";
+                uploadBtn.innerHTML = " Фото профиля";
+                uploadBtn.className = "photo-upload-btn";
+                uploadBtn.style.cssText = `
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(17, 17, 17, 0.9);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.3);
+`;
+                uploadBtn.style.display = "none"; // Показываем только в edit mode
+                profileHeader.appendChild(uploadBtn);
+
+                // Предпросмотр
+                const previewDiv = document.createElement("div");
+                previewDiv.id = "photoPreview";
+                previewDiv.style.cssText = "margin-top: 8px;";
+                profileHeader.appendChild(previewDiv);
+
+                // Обработчик выбора файла
+                photoInput.addEventListener("change", (e) => {
+                    currentPhotoFile = e.target.files[0];
+                    if (currentPhotoFile) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            profileAvatar.src = ev.target.result;
+                            previewDiv.innerHTML = `
+            <img src="${ev.target.result}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #007bff;">
+            <small style="color:#007bff;">✓ Готово к сохранению</small>
+          `;
+                        };
+                        reader.readAsDataURL(currentPhotoFile);
+                    }
+                });
+
+                return { photoInput, uploadBtn, previewDiv };
+            }
+
+
+            async function checkAuth() {
+                const token = localStorage.getItem('token');
+
+                if (!token) {
+                    localStorage.removeItem('token');
+                    sessionStorage.clear();
+                    window.location.replace('/signin');
+                    return false;
+                }
+
+                try {
+                    const response = await fetch('/check-auth', {
+                        method: 'POST', // Важно! GET может кэшироваться
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Cache-Control': 'no-cache'
+                        },
+                        cache: 'no-store' // Максимальная защита от кэша
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.authenticated) {
+                        localStorage.removeItem('token');
+                        sessionStorage.clear();
+                        window.location.replace('/signin');
+                        return false;
+                    }
+
+                    currentUserId = data.user_id;
+                    await loadProfileData(currentUserId);
+                    return true;
+
+                } catch (error) {
+                    localStorage.removeItem('token');
+                    sessionStorage.clear();
+                    window.location.replace('/signin');
+                    return false;
+                }
+            }
+
+            async function loadProfile() {
+                try {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+                        return;
+                    }
+
+                    const authRes = await fetch("/check-auth", {
+                        headers: { "Authorization": `Bearer ${token}` },
+                    });
+                    if (!authRes.ok) throw new Error("Не авторизован");
+
+                    const authData = await authRes.json();
+                    const user_id = authData.user_id;
+
+                    // ✅ УБИРАЕМ /user/${user_id} — используем только /api/profile!
+                    const profileApiRes = await fetch("/api/profile", {
+                        headers: { "Authorization": `Bearer ${token}` },
+                    });
+                    const profileApiData = await profileApiRes.json();
+                    if (!profileApiData.success) throw new Error("Ошибка получения профиля");
+
+                    const safeData = {
+                        name: profileApiData.name || "",
+                        email: profileApiData.email || "",
+                        geolocation: profileApiData.geolocation || "",
+                        age: profileApiData.age || "",
+                        direction: profileApiData.direction || "",
+                        student_group: profileApiData.student_group || "",
+                        dormitory: profileApiData.dormitory || "",
+                        phone: profileApiData.phone || "",
+                        userId: profileApiData.user_id || user_id,
+                        profile_photo: profileApiData.profile_photo || null,  // ✅ Из /api/profile
+                    };
+
+                    console.log("✅ safeData из /api/profile:", safeData);
+
+                    // ✅ ФИКС: Устанавливаем аватар ИЗ БД ПЕРЕД setViewData
+                    const profileAvatar = document.querySelector(".profile-avatar");
+                    if (safeData.profile_photo && profileAvatar) {
+                        profileAvatar.src = safeData.profile_photo + '?t=' + Date.now();
+                        console.log("✅ Аватар загружен:", safeData.profile_photo);
+                    } else if (profileAvatar) {
+                        profileAvatar.src = "https://via.placeholder.com/140x140/000/fff?text=👤";
+                        console.log("❌ Нет фото в БД");
+                    }
+
+                    setViewData(safeData);
+                    setEditData(safeData);
+
+                } catch (error) {
+                    console.error("Ошибка loadProfile:", error);
+                    window.location.href = "/signin";
+                }
+            }
+
+
+            // Загрузка объявлений в профиле
+            async function loadUserAds() {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const container = document.querySelector('.ads-list');
+                const emptyBlock = document.querySelector('.ads-empty');
+
+                try {
+                    const response = await fetch('/api/user-ads', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await response.json();
+
+                    if (data.success && data.ads && data.ads.length > 0) {
+                        emptyBlock.style.display = 'none';
+                        container.innerHTML = data.ads.map(ad => `
+                <a href="/ad/${ad.id}" class="ad-card" data-id="${ad.id}">
+                    <div class="ad-image">
+                        ${ad.first_photo
+                                ? `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">`
+                                : `<div class="no-image">📷</div>`
+                            }
+                    </div>
+                    <div class="ad-info">
+                        <span class="ad-category">${escapeHtml(ad.category || 'Без категории')}</span>
+                        <h3 class="ad-title">${escapeHtml(ad.title)}</h3>
+                        <div class="ad-price">${formatPrice(ad.price)} ₽</div>
+                        <div class="ad-date">📅 ${formatDate(ad.created_at)}</div>
+                    </div>
+                </a>
+            `).join('');
+                    } else {
+                        container.innerHTML = '';
+                        emptyBlock.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки объявлений в профиле:', error);
+                    emptyBlock.innerHTML = `
+            <span class="empty-icon">❌</span>
+            <p class="empty-text">Ошибка загрузки объявлений</p>
+        `;
+                }
+            }
+
+            // Переиспользуем функции из dashboard/modal
+            function formatPrice(price) {
+                return new Intl.NumberFormat('ru-RU').format(price);
+            }
+
+            function formatDate(dateStr) {
+                if (!dateStr) return 'Недавно';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('ru-RU', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+
+            function logout(event) {
+                event.preventDefault();
+
+                // Максимальная очистка
+                localStorage.removeItem('token');
+                sessionStorage.clear();
+
+                // События для инвалидации bfcache
+                window.onpageshow = null;
+                window.onpagehide = function () {
+                    // Отправляем сигнал для инвалидации кэша
+                    localStorage.setItem('logout', 'true');
+                };
+
+                // Редирект с принудительной инвалидацией
+                window.location.href = '/signin?' + Date.now();
+            }
+
+            //  Инициализируем фото
+            const photoElements = initPhotoUpload();
+
+            editToggle.addEventListener("click", () => {
+                saveOriginalData();
+                profileSection.classList.add("edit-mode");
+                editToggle.style.display = "none";
+                photoElements.uploadBtn.style.display = "inline-block"; //  Показываем кнопку фото
+            });
+
+            cancelBtn.addEventListener("click", () => {
+                profileSection.classList.remove("edit-mode");
+                setEditData(originalData);
+                editToggle.style.display = "block";
+                photoElements.uploadBtn.style.display = "none"; //  Скрываем
+                photoElements.previewDiv.innerHTML = ""; // Очищаем превью
+                currentPhotoFile = null;
+            });
+
+            saveBtn.addEventListener("click", async () => {
+                const token = localStorage.getItem("token");
+                if (!token) return window.location.href = "/signin";
+
+                const newData = getFormData();
+
+                try {
+                    // ✅ ОДНА отправка ВСЕХ полей
+                    const profileRes = await fetch("/api/profile", {
+                        method: "PATCH",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            name: newData.name,
+                            age: newData.age,
+                            direction: newData.direction,
+                            student_group: newData.student_group,
+                            dormitory: newData.dormitory,
+                            phone: newData.phone,
+                            email: newData.email,
+                        }),
+                    });
+
+                    if (!profileRes.ok) {
+                        const errorData = await profileRes.json();
+                        throw new Error(errorData.error || "Ошибка сохранения профиля");
+                    }
+
+                    console.log("Профиль обновлён:", await profileRes.json());
+
+                    setViewData(newData);
+                    profileSection.classList.remove("edit-mode");
+                    editToggle.style.display = "block";
+                    photoElements.uploadBtn.style.display = "none";
+
+                    //  ОБЯЗАТЕЛЬНО
+                    await loadProfile();  // чтобы после сохранения БД UI подтянул актуальные age, direction, и т.д.
+
+                    if (currentPhotoFile) {
+                        const fd = new FormData();
+                        fd.append("profile_photo", currentPhotoFile);
+
+                        const photoRes = await fetch("/api/profile/photo", {
+                            method: "POST",
+                            headers: { "Authorization": `Bearer ${token}` },
+                            body: fd,
+                        });
+
+                        if (!photoRes.ok) {
+                            const errorData = await photoRes.json();
+                            throw new Error(errorData.error || "Ошибка загрузки фото");
+                        }
+
+                        const photoResult = await photoRes.json();
+                        if (photoResult.profile_photo) {
+                            const avatar = document.querySelector(".profile-avatar");
+                            if (avatar) {
+                                avatar.src = photoResult.profile_photo;
+                            }
+                        }
+
+                        currentPhotoFile = null;
+                        photoElements.previewDiv.innerHTML = "";
+                    }
+
+                } catch (error) {
+                    console.error("Ошибка сохранения профиля:", error);
+                    alert("Ошибка сохранения: " + error.message);
+                }
+            });
+            loadProfile();
+            loadUserAds();
+        });
+    </script>
+    <script>document.addEventListener("DOMContentLoaded", () => {
+            const logoContainer = document.getElementById("logoContainer");
+            const subtitle = document.getElementById("subtitle");
+            const letters = ["B", "A", "Z", "A", "R"];
+
+            let animationId;
+            let startTime;
+            let isVisible = false;
+
+            // Создание отдельные буквы BAZAR
+            function initLetters() {
+                logoContainer.innerHTML = "";
+                letters.forEach((letter) => {
+                    const span = document.createElement("span");
+                    span.textContent = letter;
+                    span.className = "logo-letter";
+                    logoContainer.appendChild(span);
+                });
+            }
+
+            // Появление букв
+            function showLetters() {
+                const letterElements = document.querySelectorAll(".logo-letter");
+                letterElements.forEach((el, i) => {
+                    setTimeout(() => el.classList.add("visible"), i * 150);
+                });
+                setTimeout(() => subtitle.classList.add("visible"), 1200);
+            }
+
+            // Волновой полёт ( для 5 букв)
+            function animate(currentTime = performance.now()) {
+                if (!isVisible) return;
+
+                const elapsed = currentTime - startTime;
+                const letterElements = document.querySelectorAll(".logo-letter");
+
+                letters.forEach((_, i) => {
+                    if (letterElements[i]) {
+                        const xWave = Math.sin(elapsed * 0.0012 + i * 0.9) * (0.8 + i * 0.3);
+                        const yWave = Math.sin(elapsed * 0.0018 + i * 1.4) * (1.2 + i * 0.3);
+                        const scale = 1 + Math.sin(elapsed * 0.002 + i) * 0.05; //  дыхание
+                        letterElements[i].style.transform =
+                            `scale(${scale}) translate(${xWave}px, ${yWave}px)`;
+                    }
+                });
+
+                animationId = requestAnimationFrame(animate);
+            }
+
+            // Запуск
+            initLetters();
+
+            setTimeout(() => {
+                isVisible = true;
+                showLetters();
+                startTime = performance.now();
+                animate();
+            }, 800);
+
+            // Очистка
+            window.addEventListener("beforeunload", () => {
+                if (animationId) cancelAnimationFrame(animationId);
+            });
+        });
+
+        // Кнопка возврата (без изменений)
+        const backButton = document.getElementById("backButton");
+
+        function initMenu() {
+            // Анимация кнопки возврата
+            setTimeout(() => {
+                backButton.style.opacity = "1";
+                backButton.style.transform = "translateY(0)";
+            }, 400);
+        }
+
+        setTimeout(() => {
+            const subtitleLink = document.getElementById("subtitleLink");
+            if (subtitleLink) subtitleLink.classList.add("visible");
+        }, 1200);
+    </script>
+</body>
+
+</html>

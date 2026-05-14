@@ -6,45 +6,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bazar - Все объявления</title>
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;900&display=swap");
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
         }
 
         body {
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+            color: #111;
             min-height: 100vh;
+            padding: 100px 20px 60px 20px;
         }
 
-        /* Header */
+        /* Header — стекляный стиль, как в dashboard */
         .top-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: white;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(25px);
+            z-index: 1000;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             padding: 0 40px;
             height: 70px;
-            border-bottom: 1px solid #e5e5e5;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
         }
 
         .logo {
             font-size: 24px;
             font-weight: 700;
-            color: black;
+            color: #111;
             text-decoration: none;
         }
 
         .nav-links {
             display: flex;
-            gap: 30px;
+            gap: 24px;
             align-items: center;
         }
 
@@ -52,154 +57,149 @@
             text-decoration: none;
             color: #333;
             font-weight: 500;
-            transition: color 0.2s;
+            transition: 0.2s ease;
         }
 
         .nav-links a:hover {
-            color: black;
+            color: #111;
         }
 
         .auth-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            align-items: center;
         }
 
         .btn-outline {
-            padding: 8px 20px;
-            background: transparent;
-            border: 1px solid black;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
             font-size: 14px;
-            transition: all 0.2s;
-            text-decoration: none;
-            color: black;
+            cursor: pointer;
+            color: #111;
+            transition: 0.2s ease;
         }
 
         .btn-outline:hover {
-            background: black;
-            color: white;
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(17, 17, 17, 0.3);
         }
 
         .btn-primary {
             padding: 8px 20px;
-            background: black;
-            color: white;
-            border: none;
-            border-radius: 8px;
+            background: #111 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 16px !important;
+            font-size: 14px !important;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
+            transition: 0.2s ease;
             text-decoration: none;
         }
 
         .btn-primary:hover {
-            background: #333;
+            background: #2a2a2a !important;
+            transform: translateY(-1px);
         }
 
         .user-menu {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .user-name {
             font-weight: 500;
-            color: #333;
+            color: #111;
         }
 
         /* Main content */
         .main-container {
             max-width: 1200px;
-            margin: 90px auto 40px;
-            padding: 0 20px;
+            margin: 0 auto;
         }
 
         .hero {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .hero h1 {
-            font-size: 42px;
-            margin-bottom: 15px;
+            font-size: clamp(32px, 5.5vw, 48px);
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            background: linear-gradient(135deg, #111 0%, #333 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero p {
             color: #666;
-            font-size: 18px;
+            font-size: 16px;
         }
 
-        /* Фильтры */
-        .filters {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
+
+
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(17, 17, 17, 0.3);
+            background: rgba(255, 255, 255, 0.45);
         }
 
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-        }
 
-        .category-select {
-            padding: 12px 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
+
+        .category-select:focus {
+            outline: none;
+            border-color: rgba(17, 17, 17, 0.3);
+            background: rgba(255, 255, 255, 0.45);
         }
 
         /* Сетка объявлений */
         .ads-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
         }
 
+        /* Карточка объявления — стеклянный стиль */
         .ad-card {
-            background: white;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s;
-            cursor: pointer;
+            transition: all 0.3s ease;
             text-decoration: none;
             color: inherit;
-            display: block;
         }
 
         .ad-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
         .ad-image {
             width: 100%;
             height: 200px;
-            background: #f0f0f0;
             overflow: hidden;
+            border-radius: 16px 16px 0 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
         .ad-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s;
+            transition: transform 0.3s ease;
         }
 
         .ad-card:hover .ad-image img {
-            transform: scale(1.05);
+            transform: scale(1.04);
         }
 
         .no-image {
@@ -207,52 +207,57 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #999;
-            font-size: 48px;
+            color: #777;
+            font-size: 40px;
         }
 
         .ad-info {
-            padding: 20px;
+            padding: 20px 20px 24px 20px;
         }
 
         .ad-category {
             display: inline-block;
-            padding: 4px 12px;
-            background: #f0f0f0;
-            border-radius: 20px;
+            padding: 4px 10px;
+            background: rgba(17, 17, 17, 0.9);
+            color: #fff;
+            border-radius: 8px;
             font-size: 12px;
-            color: #666;
-            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .ad-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 8px;
+            color: #111;
+            margin: 8px 0 6px 0;
             line-height: 1.4;
         }
 
         .ad-price {
-            font-size: 22px;
+            font-size: 19px;
             font-weight: 700;
-            color: black;
-            margin: 12px 0;
+            color: #111;
+            margin: 8px 0 6px 0;
         }
 
         .ad-seller {
             font-size: 13px;
-            color: #999;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #eee;
+            color: #666;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            background: white;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
             grid-column: 1 / -1;
         }
 
@@ -261,17 +266,286 @@
             font-size: 16px;
         }
 
+        /* левый край — логотип BAZAR */
+        .top-header .logo-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .top-header .logo-left a {
+            text-decoration: none !important;
+            color: #111;
+            font-size: clamp(18px, 4.5vw, 26px);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        #logoContainer {
+            display: flex;
+            gap: 0.05em;
+            font-size: clamp(22px, 5.2vw, 32px);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .logo-letter {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .logo-letter.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #subtitle {
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            transition: all 0.7s ease;
+        }
+
+        #subtitle.visible {
+            opacity: 1;
+        }
+
+        /* Логотип BAZAR слева — не как обычная ссылка */
+        #logoLink {
+            text-decoration: none !important;
+            color: #111 !important;
+            cursor: default;
+            /* или pointer, если хочешь стрелку */
+        }
+
+        /* насильно убираем стандартные состояния :link/:visited */
+        #logoLink:link,
+        #logoLink:visited,
+        #logoLink:hover,
+        #logoLink:active {
+            text-decoration: none !important;
+            color: #111 !important;
+        }
+
+        /* можно чуть уменьшить отступ совсем без жира */
+        #logoLink {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Фильтры (ввод + селект) — стеклянный стиль */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            margin-bottom: 28px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Поисковый инпут */
+        .search-input {
+            flex: 1 1 240px;
+            padding: 10px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            font-size: 15px;
+            color: #111;
+            outline: none;
+            backdrop-filter: blur(8px);
+            transition: 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: rgba(17, 17, 17, 0.3);
+            background: rgba(255, 255, 255, 0.45);
+            box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.15);
+        }
+
+        /* Селект категории — стеклянный стиль */
+        .category-select {
+            padding: 10px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            font-size: 15px;
+            color: #111;
+            cursor: pointer;
+            outline: none;
+            backdrop-filter: blur(8px);
+            transition: 0.2s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            flex: 0 1 220px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3e%3cpath d='M0 0L8 0 4 5z' fill='%23111'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 8px 5px;
+            padding-right: 40px;
+        }
+
+        .category-select:focus,
+        .category-select:active {
+            border-color: rgba(17, 17, 17, 0.3);
+            background: rgba(255, 255, 255, 0.45);
+            box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.15);
+        }
+
+        /* Стиль для optgroup (подгруппы) */
+        .category-select optgroup {
+            background: rgba(17, 17, 17, 0.12);
+            color: #111;
+            font-weight: 600;
+            padding: 2px 0;
+        }
+
+        /* Опции категории */
+        .category-select option {
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.3);
+            color: #111;
+            font-size: 14px;
+        }
+
+        /* Подсветка при наведении в меню опций (где работает) */
+        .category-select option:hover {
+            background: rgba(17, 17, 17, 0.9);
+            color: #fff;
+        }
+
+        /* Скролл для селекта (если включён) */
+        .category-select::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .category-select::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .category-select::-webkit-scrollbar-thumb {
+            background: rgba(17, 17, 17, 0.4);
+            border-radius: 4px;
+        }
+
+        .user-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            /* Расстояние между фото и именем */
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        }
+
+        /* Мобильная версия */
         @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input,
+            .category-select {
+                width: 100%;
+            }
+        }
+
+        /* Логотип BAZAR — один раз */
+        .top-header .logo-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .top-header .logo-left a {
+            text-decoration: none;
+            color: #111;
+            font-size: clamp(18px, 4.5vw, 26px);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        #logoContainer {
+            display: flex;
+            gap: 0.05em;
+            font-size: clamp(22px, 5.2vw, 32px);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .logo-letter {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .logo-letter.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #subtitle {
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            transition: all 0.7s ease;
+        }
+
+        #subtitle.visible {
+            opacity: 1;
+        }
+
+        /* не даём логотипу вести себя как “ссылка” */
+        #logoLink {
+            text-decoration: none !important;
+            color: #111 !important;
+            cursor: default;
+            display: flex;
+            align-items: center;
+        }
+
+        #logoLink:link,
+        #logoLink:visited,
+        #logoLink:hover,
+        #logoLink:active {
+            text-decoration: none !important;
+            color: #111 !important;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 100px 20px 40px;
+            }
+
             .top-header {
                 padding: 0 20px;
             }
 
             .hero h1 {
-                font-size: 28px;
-            }
-
-            .ads-grid {
-                grid-template-columns: 1fr;
+                font-size: 32px;
             }
 
             .filters {
@@ -282,6 +556,10 @@
             .category-select {
                 width: 100%;
             }
+
+            .ads-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -289,36 +567,103 @@
 <body>
     <header>
         <div class="top-header">
-            <a href="/marketplace" class="logo">Bazar</a>
+            <!-- Логотип BAZAR -->
+            <div class="logo-section">
+                <a href="/marketplace" id="logoLink">
+                    <div id="logoContainer"></div>
+                </a>
+            </div>
+
             <div class="nav-links">
-                <a href="/marketplace">Главная</a>
                 <div id="authSection">
                     <div class="user-menu">
-                    <span class="user-name" id="userName">Загрузка...</span>
-                    <a href="/dashboard" class="btn-primary">Мои объявления</a>
-                    <button onclick="logout()" class="btn-outline">Выйти</button>
-                </div>
+                        <a href="/dashboard" class="btn-primary">Мои объявления</a>
+                        <a href="/profile" class="user-menu-link" id="userMenuContainer">
+                            <img src="https://via.placeholder.com/30" alt="Аватар" id="userAvatar" class="user-avatar">
+                            <span class="user-name" id="userName">Загрузка...</span>
+                        </a>
+                        <button onclick="logout()" class="btn-outline">Выйти</button>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
-
     <div class="main-container">
         <div class="hero">
-            <h1>📦 Доска объявлений</h1>
+            <h1> Доска объявлений</h1>
             <p>Находите товары и услуги от пользователей Bazar</p>
         </div>
 
         <div class="filters">
             <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию...">
+
+
             <select id="categoryFilter" class="category-select">
                 <option value="">Все категории</option>
-                <option value="Электроника">📱 Электроника</option>
-                <option value="Одежда">👕 Одежда</option>
-                <option value="Недвижимость">🏠 Недвижимость</option>
-                <option value="Авто">🚗 Авто</option>
-                <option value="Услуги">💼 Услуги</option>
-                <option value="Другое">📦 Другое</option>
+
+                <!-- Товары -->
+                <optgroup label="🛍 Товары">
+                    <option value="Техника" data-slug="electronics" data-category_type="goods">📱 Техника</option>
+                    <option value="Одежда" data-slug="clothes" data-category_type="goods">👕 Одежда</option>
+                    <option value="Мебель" data-slug="furniture" data-category_type="goods">🛋 Мебель</option>
+                    <option value="Книги" data-slug="books" data-category_type="goods">📚 Книги</option>
+                    <option value="Другое" data-slug="other" data-category_type="goods">📦 Другое</option>
+                </optgroup>
+
+                <!-- Жильё -->
+                <optgroup label="🏠 Жильё">
+                    <option value="Поиск соседей" data-slug="search_roommate" data-category_type="housing">👨‍👩‍👧‍👦
+                        Поиск соседей</option>
+                    <option value="Аренда комнаты" data-slug="room_rent" data-category_type="housing">🛏 Аренда комнаты
+                    </option>
+                </optgroup>
+
+                <!-- Услуги -->
+                <optgroup label="💼 Услуги">
+                    <option value="Репетиторство" data-slug="tutoring" data-category_type="services">📚 Репетиторство
+                    </option>
+                    <option value="Программирование" data-slug="programming" data-category_type="services">💻
+                        Программирование</option>
+                    <option value="Помощь с курсовыми" data-slug="coursework_help" data-category_type="services">🎓
+                        Помощь с курсовыми</option>
+                </optgroup>
+
+                <!-- Обмен -->
+                <optgroup label="🔄 Обмен">
+                    <option value="Обмен вещами" data-slug="item_exchange" data-category_type="exchange">🔄 Обмен вещами
+                    </option>
+                    <option value="Отдам даром" data-slug="giveaway" data-category_type="exchange">🎁 Отдам даром
+                    </option>
+                </optgroup>
+
+                <!-- Учеба -->
+                <optgroup label="📖 Материалы для учебы">
+                    <option value="Конспекты" data-slug="notes" data-category_type="study">📝 Конспекты</option>
+                    <option value="Учебники" data-slug="textbooks" data-category_type="study">📚 Учебники</option>
+                    <option value="Подготовка к экзаменам" data-slug="exam_prep" data-category_type="study">🧪
+                        Подготовка к экзаменам</option>
+                </optgroup>
+
+                <!-- Работа/подработка -->
+                <optgroup label="💼 Работа / Подработка">
+                    <option value="Стажировки" data-slug="internship" data-category_type="work">👩‍💻 Стажировки
+                    </option>
+                    <option value="Волонтёрство" data-slug="volunteer" data-category_type="work">🌍 Волонтёрство
+                    </option>
+                    <option value="Вакансии" data-slug="vacancy" data-category_type="work">💰 Вакансии</option>
+                </optgroup>
+
+                <!-- Транспорт -->
+                <optgroup label="🚗 Транспорт">
+                    <option value="Авто" data-slug="car" data-category_type="transport">🚗 Авто</option>
+                    <option value="Велосипеды" data-slug="bicycle" data-category_type="transport">🚲 Велосипеды</option>
+                </optgroup>
+
+                <!-- События -->
+                <optgroup label="🎉 События">
+                    <option value="Мероприятия" data-slug="event" data-category_type="events">🎪 Мероприятия</option>
+                    <option value="Студклубы" data-slug="club" data-category_type="events">👥 Студклубы</option>
+                </optgroup>
             </select>
         </div>
 
@@ -328,7 +673,7 @@
             </div>
         </div>
     </div>
-    
+
 
     <script>
         let allAds = [];
@@ -392,13 +737,13 @@
             container.innerHTML = filteredAds.map(ad => `
                 <a href="/ad/${ad.id}" class="ad-card">
                     <div class="ad-image">
-                        ${ad.first_photo ?
-                    `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">` :
-                    `<div class="no-image">📷</div>`
+                        ${ad.first_photo
+                    ? `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">`
+                    : `<div class="no-image">📷</div>`
                 }
                     </div>
                     <div class="ad-info">
-                        <span class="ad-category">${escapeHtml(ad.category)}</span>
+                        <span class="ad-category">${escapeHtml(ad.category_name || ad.category || '')}</span>
                         <h3 class="ad-title">${escapeHtml(ad.title)}</h3>
                         <div class="ad-price">${formatPrice(ad.price)} ₽</div>
                         <div class="ad-seller">👤 ${escapeHtml(ad.seller_name)}</div>
@@ -420,7 +765,7 @@
 
         // Проверка авторизации для отображения меню
         async function checkAuth() {
-            const token = localStorage.getItem('auth_token');
+            const token = localStorage.getItem('token');
             const authSection = document.getElementById('authSection');
 
             if (token) {
@@ -438,29 +783,42 @@
                     console.log('Не авторизован');
                 }
             }
-            if (!token) {
-                window.location.href = '/signin';
-                return false;
-            }
+
+            // если токена нет — НЕ просто редирект, а с next
+            window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
         }
 
         async function loadUserName(userId) {
-            const token = localStorage.getItem('auth_token');
+            const token = localStorage.getItem('token');
             try {
-                const response = await fetch(`/user/${userId}`, {
+                // API /api/profile, так как там информация о фото
+                const response = await fetch(`/api/profile`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
+
                 if (data.success) {
-                    document.getElementById('userName').textContent = data.username;
+                    // Обновляем имя
+                    document.getElementById('userName').textContent = data.name;
+
+                    //  ОБНОВЛЯЕМ ФОТО
+                    const userAvatar = document.getElementById('userAvatar');
+                    if (userAvatar) {
+                        if (data.profile_photo) {
+                            userAvatar.src = data.profile_photo;
+                        } else {
+                            // Дефолтное фото, если в БД пусто
+                            userAvatar.src = "https://via.placeholder.com/30/000/fff?text=👤";
+                        }
+                    }
                 }
             } catch (e) {
-                console.log('Ошибка загрузки имени');
+                console.error('Ошибка загрузки данных профиля:', e);
             }
         }
 
         function logout() {
-            localStorage.removeItem('auth_token');
+            localStorage.removeItem('token');
             window.location.href = '/';
         }
 
@@ -471,6 +829,87 @@
         // Загрузка
         loadAds();
         checkAuth();
+    </script>
+    <script>document.addEventListener("DOMContentLoaded", () => {
+            const logoContainer = document.getElementById("logoContainer");
+            const subtitle = document.getElementById("subtitle");
+            const letters = ["B", "A", "Z", "A", "R"];
+
+            let animationId;
+            let startTime;
+            let isVisible = false;
+
+            // Создание отдельные буквы BAZAR
+            function initLetters() {
+                logoContainer.innerHTML = "";
+                letters.forEach((letter) => {
+                    const span = document.createElement("span");
+                    span.textContent = letter;
+                    span.className = "logo-letter";
+                    logoContainer.appendChild(span);
+                });
+            }
+
+            // Появление букв
+            function showLetters() {
+                const letterElements = document.querySelectorAll(".logo-letter");
+                letterElements.forEach((el, i) => {
+                    setTimeout(() => el.classList.add("visible"), i * 150);
+                });
+                setTimeout(() => subtitle.classList.add("visible"), 1200);
+            }
+
+            // Волновой полёт ( для 5 букв)
+            function animate(currentTime = performance.now()) {
+                if (!isVisible) return;
+
+                const elapsed = currentTime - startTime;
+                const letterElements = document.querySelectorAll(".logo-letter");
+
+                letters.forEach((_, i) => {
+                    if (letterElements[i]) {
+                        const xWave = Math.sin(elapsed * 0.0012 + i * 0.9) * (0.8 + i * 0.3);
+                        const yWave = Math.sin(elapsed * 0.0018 + i * 1.4) * (1.2 + i * 0.3);
+                        const scale = 1 + Math.sin(elapsed * 0.002 + i) * 0.05; //  дыхание
+                        letterElements[i].style.transform =
+                            `scale(${scale}) translate(${xWave}px, ${yWave}px)`;
+                    }
+                });
+
+                animationId = requestAnimationFrame(animate);
+            }
+
+            // Запуск
+            initLetters();
+
+            setTimeout(() => {
+                isVisible = true;
+                showLetters();
+                startTime = performance.now();
+                animate();
+            }, 800);
+
+            // Очистка
+            window.addEventListener("beforeunload", () => {
+                if (animationId) cancelAnimationFrame(animationId);
+            });
+        });
+
+        // Кнопка возврата (без изменений)
+        const backButton = document.getElementById("backButton");
+
+        function initMenu() {
+            // Анимация кнопки возврата
+            setTimeout(() => {
+                backButton.style.opacity = "1";
+                backButton.style.transform = "translateY(0)";
+            }, 400);
+        }
+
+        setTimeout(() => {
+            const subtitleLink = document.getElementById("subtitleLink");
+            if (subtitleLink) subtitleLink.classList.add("visible");
+        }, 1200);
     </script>
 </body>
 

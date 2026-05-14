@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,7 @@
             height: 70px;
             border-bottom: 1px solid #e5e5e5;
             z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .logo {
@@ -115,7 +116,7 @@
             background: white;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0;
@@ -263,25 +264,26 @@
             .top-header {
                 padding: 0 20px;
             }
-            
+
             .ad-detail {
                 grid-template-columns: 1fr;
             }
-            
+
             .main-photo {
                 height: 300px;
             }
-            
+
             .ad-title {
                 font-size: 24px;
             }
-            
+
             .ad-price {
                 font-size: 28px;
             }
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="top-header">
@@ -299,23 +301,39 @@
     </header>
 
     <div class="main-container">
-        <a href="/marketplace" class="back-link">← Назад к объявлениям</a>
-        
+        <div id="backSection">
+            <a href="/marketplace" class="back-link" id="backLink">← Назад к объявлениям</a>
+        </div>
+
         <div id="adContent">
             <div class="loading">⏳ Загрузка объявления...</div>
         </div>
     </div>
 
     <script>
-        // Получаем ad_id из URL (более надежный способ)
         function getAdIdFromUrl() {
             const path = window.location.pathname;
             const parts = path.split('/');
             return parseInt(parts[parts.length - 1]);
         }
-        
+
         const adId = getAdIdFromUrl();
-        
+
+        // Определяем, откуда пришёл пользователь
+        function initBackLink() {
+            const referer = document.referrer;
+
+            if (referer.includes('/dashboard')) {
+                document.getElementById('backLink').href = '/dashboard';
+                document.getElementById('backLink').textContent = '← Назад к моим объявлениям';
+            } else if (referer.includes('/marketplace')) {
+                document.getElementById('backLink').href = '/marketplace';
+                document.getElementById('backLink').textContent = '← Назад к объявлениям';
+            }
+            // по умолчанию пусть будет marketplace
+        }
+
+
         async function loadAdDetail() {
             try {
                 const response = await fetch(`/api/ad/${adId}`);
@@ -323,163 +341,154 @@
 
                 if (!data.success) {
                     document.getElementById('adContent').innerHTML = `
-                        <div class="error">
-                            <p>❌ ${data.error || 'Объявление не найдено'}</p>
-                            <a href="/" style="color: black; margin-top: 20px; display: inline-block;">Вернуться на главную</a>
-                        </div>
-                    `;
+        <div class="error">
+          <p>❌ ${data.error || 'Объявление не найдено'}</p>
+          <a href="/marketplace" style="color: black; margin-top: 20px; display: inline-block;">Вернуться к объявлениям</a>
+        </div>
+      `;
                     return;
                 }
 
                 const ad = data.ad;
+                console.log("Поля объявления:", Object.keys(ad));
+                console.log("seller_name:", ad.seller_name, "seller_email:", ad.seller_email);
+                console.log("data.ad", data.ad);   // ✅
+
                 document.title = `${ad.title} | Bazar`;
-                
-                // Рендер галереи
+
                 let galleryHtml = '';
                 let mainPhotoHtml = '';
-                
+
                 if (ad.photos && ad.photos.length > 0) {
                     mainPhotoHtml = `<img id="mainImage" src="${ad.photos[0].url}" alt="${escapeHtml(ad.title)}">`;
                     galleryHtml = ad.photos.map((photo, index) => `
-                        <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changePhoto('${photo.url}', ${index})">
-                            <img src="${photo.url}" alt="Фото ${index + 1}">
-                        </div>
-                    `).join('');
+        <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changePhoto('${photo.url}', ${index})">
+          <img src="${photo.url}" alt="Фото ${index + 1}">
+        </div>
+      `).join('');
                 } else {
-                    mainPhotoHtml = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 48px;">📷</div>`;
+                    mainPhotoHtml = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:48px;">📷</div>`;
                 }
-                
+
                 const html = `
-                    <div class="ad-detail">
-                        <div class="gallery-section">
-                            <div class="main-photo">
-                                ${mainPhotoHtml}
-                            </div>
-                            ${ad.photos && ad.photos.length > 1 ? `
-                                <div class="thumbnails">
-                                    ${galleryHtml}
-                                </div>
-                            ` : ''}
-                        </div>
-                        <div class="info-section">
-                            <span class="category-badge">${escapeHtml(ad.category)}</span>
-                            <h1 class="ad-title">${escapeHtml(ad.title)}</h1>
-                            <div class="ad-price">${formatPrice(ad.price)} ₽</div>
-                            <div class="ad-description">${escapeHtml(ad.description || 'Нет описания')}</div>
-                            
-                            <div class="seller-info">
-                                <h3>📢 Продавец</h3>
-                                <div class="seller-name">${escapeHtml(ad.seller_name)}</div>
-                                <div class="seller-contact">
-                                    📧 ${escapeHtml(ad.seller_email)}<br>
-                                    📍 ${escapeHtml(ad.seller_geolocation || 'Не указано')}
-                                </div>
-                            </div>
-                            
-                            <div class="ad-date">
-                                📅 Опубликовано: ${formatDate(ad.created_at)}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
+      <div class="ad-detail">
+        <div class="gallery-section">
+          <div class="main-photo">
+            ${mainPhotoHtml}
+          </div>
+          ${ad.photos && ad.photos.length > 1 ? `
+            <div class="thumbnails">
+              ${galleryHtml}
+            </div>
+          ` : ''}
+        </div>
+        <div class="info-section">
+          <span class="category-badge">${escapeHtml(ad.category_name || ad.category || 'Без категории')}</span>
+          <h1 class="ad-title">${escapeHtml(ad.title)}</h1>
+          <div class="ad-price">${formatPrice(ad.price)} ₽</div>
+          <div class="ad-description">${escapeHtml(ad.description || 'Нет описания')}</div>
+
+          <div class="seller-info">
+            <h3>📢 Продавец</h3>
+            <div class="seller-name">${escapeHtml(ad.seller_name || 'Аноним')}</div>
+            <div class="seller-contact">
+              📧 ${escapeHtml(ad.seller_email || 'Нет email')}<br>
+              📍 ${escapeHtml(ad.seller_geolocation || 'Не указано')}
+            </div>
+          </div>
+
+          <div class="ad-date">
+            📅 Опубликовано: ${formatDate(ad.created_at)}
+          </div>
+        </div>
+      </div>
+    `;
+
                 document.getElementById('adContent').innerHTML = html;
-                
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('Ошибка загрузки:', error);
                 document.getElementById('adContent').innerHTML = `
-                    <div class="error">
-                        <p>❌ Ошибка загрузки объявления</p>
-                        <a href="/" style="color: black; margin-top: 20px; display: inline-block;">Вернуться на главную</a>
-                    </div>
-                `;
+      <div class="error">
+        <p>❌ Ошибка загрузки объявления</p>
+        <a href="/marketplace" style="color: black; margin-top: 20px; display: inline-block;">Вернуться к объявлениям</a>
+      </div>
+    `;
             }
         }
-        
-        // Глобальная функция для смены фото
-        window.changePhoto = function(url, index) {
+
+        window.changePhoto = function (url, index) {
             const mainImage = document.getElementById('mainImage');
-            if (mainImage) {
-                mainImage.src = url;
-            }
-            
-            // Обновляем активный класс у миниатюр
-            const thumbnails = document.querySelectorAll('.thumbnail');
-            thumbnails.forEach((thumb, i) => {
-                if (i === index) {
-                    thumb.classList.add('active');
-                } else {
-                    thumb.classList.remove('active');
-                }
+            if (mainImage) mainImage.src = url;
+
+            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
             });
         };
-        
+
         function formatPrice(price) {
             return new Intl.NumberFormat('ru-RU').format(price);
         }
-        
+
         function formatDate(dateStr) {
             if (!dateStr) return 'Недавно';
             try {
                 const date = new Date(dateStr);
                 return date.toLocaleDateString('ru-RU', {
-                    day: 'numeric', month: 'long', year: 'numeric'
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
                 });
             } catch (e) {
                 return dateStr;
             }
         }
-        
+
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-        
+
         async function checkAuth() {
-            const token = localStorage.getItem('auth_token');
-            const authSection = document.getElementById('authSection');
-            
-            if (token) {
-                try {
-                    const response = await fetch('/check-auth', {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                    const data = await response.json();
-                    
-                    if (data.authenticated) {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/check-auth', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+
+                if (data.authenticated) {
+                    const authSection = document.getElementById('authSection');
+                    if (authSection) {
                         authSection.innerHTML = `
-                            <div class="user-menu">
-                                <a href="/dashboard" class="btn-primary">Мои объявления</a>
-                                <button onclick="logout()" class="btn-outline">Выйти</button>
-                            </div>
-                        `;
-                        return;
+                        <div class="user-menu">
+                            <a href="/dashboard" class="btn-primary">Мои объявления</a>
+                            <button onclick="logout()" class="btn-outline">Выйти</button>
+                        </div>
+                    `;
                     }
-                } catch (e) {
-                    console.log('Ошибка проверки авторизации');
+                } else {
+                    localStorage.removeItem('token');
                 }
+            } catch (e) {
+                console.log('Ошибка проверки авторизации', e);
             }
-            
-            authSection.innerHTML = `
-                <div class="auth-buttons">
-                    <a href="/signin" class="btn-outline">Войти</a>
-                    <a href="/" class="btn-primary">Регистрация</a>
-                </div>
-            `;
         }
-        
+
         function logout() {
-            localStorage.removeItem('auth_token');
+            localStorage.removeItem('token');
             window.location.href = '/';
         }
-        
-        // Загружаем данные при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initBackLink();
             loadAdDetail();
             checkAuth();
         });
     </script>
 </body>
+
 </html>

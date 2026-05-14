@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход в аккаунт</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;900&display=swap">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+        }
 
-          *{
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-              font-family: "inter", sans-serif;
-          }
         .error-message {
             color: #e53e3e;
             font-size: 12px;
-            margin-top: 5px;
+            margin-top: 6px;
             display: none;
             padding-left: 5px;
             font-weight: 500;
@@ -35,163 +37,271 @@
             display: none;
             animation: slideIn 0.3s ease;
             font-weight: 500;
+            border-left: 4px solid transparent;
         }
 
         .server-message.success {
             background: #c6f6d5;
             color: #22543d;
-            border-left: 4px solid #38a169;
+            border-left-color: #38a169;
         }
 
         .server-message.error {
             background: #fed7d7;
             color: #742a2a;
-            border-left: 4px solid #e53e3e;
+            border-left-color: #e53e3e;
         }
 
         .server-message.info {
             background: #e6f3ff;
             color: #1e4b7a;
-            border-left: 4px solid #3182ce;
+            border-left-color: #3182ce;
         }
 
-        body{
-          display: flex;
-          justify-content: center;
-          min-height: 100vh;
-          align-items: center;
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 60px 20px 80px;
+            background: #fff;
+            /* ← чисто белый фон */
         }
 
-        .login-container{
-          width: 480px;
-          color: black;
-          align-items: center;
+        .login-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 36px 28px;
+            background: #fff;
+            /* белый фон формы */
+            border-radius: 0;
+            /* нет рамки/скруглений */
+            box-shadow: none;
+            /* без тени */
         }
 
-        .form-group{
-          width: 100%;
-          height: 48px;
-          margin: 50px 0;
+        .welcome-text {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 40px;
+            text-align: center;
         }
 
-        .welcome-text{
-          font-size: 35px;
-          color: black;
-          margin-bottom: 80px;
-        }
-
-        .form-group input{
-          width: 100%;
-          height: 100%;
-          background: transparent;
-          border: none;
-          outline: none;
-          font-size: 16px;
-          padding: 15px;
-          background: rgb(243, 243, 243);
-        }
-
-        .wrapper .input-box{
-          width: 100%;
-          height: 48px;
-          margin: 50px 0;
-          background: rgb(243, 243, 243);
-        }
-
-        .form-group input:focus {
-          border: 1px solid black;
-        }
-
-        .btn-login{
-          margin-top: 30px;
-          width: 100%;
-          height: 48px;
-          background: black;
-          border: none;
-          outline: none;
-          cursor: pointer;
-          font-size: 16px;
-          color: white;
-        }
-
-        .btn-login:hover {
-          background-color: rgb(134, 134, 134);
-          color: white;
-        }
-
-        .register-link{
-          font-size: 16px;
-          color: rgb(134, 134, 134);
-          text-align: center;
-          margin-top: 31px;
-        }
-
-        .register-link a{
-          color: black;
-          text-decoration: none;
-          font-weight: 600;
-          margin-left: 7px;
-        }
-
-        .register-link a:hover{
-          color: rgb(134, 134, 134);
-        }
-
-        .top-header{
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          background: white;
-          display: flex;
-          justify-content: center;
-          background-color: white;
-          height: 60px;
-          border-bottom: 1px solid rgb(230, 230, 230);
-        }
-
-        .top-header img{
-          width: 45px;
-          display: flex;
+        .form-group {
+            width: 100%;
+            margin: 24px 0;
         }
 
         .form-title {
-          font-size: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 6px;
+            text-align: left;
         }
 
-        .forgot-password a{
-          text-decoration: none;
-          color: black;
-          white-space: nowrap;
+        .input-box,
+        .form-group input {
+            width: 100%;
+            padding: 0 15px;
+            height: 50px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: #f9f9f9;
+            font-size: 16px;
+            color: #111;
+            outline: none;
+            transition: all 0.2s ease;
         }
 
-        .forgot-password a:hover{
-          color: rgb(134, 134, 134);
+        .form-group input:focus {
+            border-color: #111;
+            background: #fff;
+        }
+
+        .form-group input.error {
+            border-color: #e53e3e;
+            background: #fdf2f2;
         }
 
         .form-options {
-          display: flex;
-          justify-content: space-between; /* распределяет элементы по краям */
-          align-items: center; /* выравнивает по вертикали */
-          flex-wrap: nowrap; /* запрещает перенос */
-          white-space: nowrap; /* запрещает перенос текста */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 18px;
+            margin-bottom: 16px;
         }
 
-/* Если внутри label текст все равно переносится */
         .remember-me {
-          white-space: nowrap;
+            font-size: 14px;
+            color: #666;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .forgot-password a {
+            text-decoration: none;
+            color: #111;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+            color: #999;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 50px;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-login:hover {
+            background: #222;
+            transform: translateY(-2px);
+        }
+
+        .btn-login:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .register-link {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .register-link a {
+            color: #111;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .register-link a:hover {
+            color: #999;
+            text-decoration: underline;
+        }
+
+        /* Шапка с летающим BAZAR */
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            background-color: white;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 12px 40px 0;
+            height: 70px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .top-header a#logoLink {
+            display: block;
+            text-decoration: none;
+        }
+
+        .logo-section {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        #logoContainer {
+            display: flex;
+            gap: 0.08em;
+            font-size: clamp(28px, 5.5vw, 52px);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .logo-letter {
+            opacity: 0;
+            transform: translateY(30px) scale(0.8);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .logo-letter.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        #logoContainer:hover .logo-letter {
+            animation: hoverPulse 0.4s ease-in-out;
+        }
+
+        #logoLink {
+            text-decoration: none !important;
+            color: #111 !important;
+            cursor: default;
+            /* или pointer, если хочешь стрелку */
+        }
+
+        /* насильно убираем стандартные состояния :link/:visited */
+        #logoLink:link,
+        #logoLink:visited,
+        #logoLink:hover,
+        #logoLink:active {
+            text-decoration: none !important;
+            color: #111 !important;
+        }
+
+        /* можно чуть уменьшить отступ совсем без жира */
+        #logoLink {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
+
 <body>
 
-  <header>
-    <div class="top-header">
-        <a href="a" class="logo">
-            Bazar
-        </a>
-    </div>
-</header>
+    <header>
+        <div class="top-header">
+            <a href="/marketplace" id="logoLink" class="logo">
+                <div id="logoContainer"></div>
+            </a>
+        </div>
+    </header>
 
     <div class="login-container">
         <h2 class="welcome-text">Bazar тебя ждал, входи скорее</h2>
@@ -233,7 +343,7 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault(); // Останавливаем стандартную отправку
 
             // Очищаем сообщения
@@ -247,9 +357,9 @@
             let isValid = true;
 
             // Валидация email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const emailRegex = /^[^\s@]+@mai\.education$/;
             if (!emailRegex.test(email)) {
-                showError('emailError', 'Введите корректный email адрес');
+                showError('emailError', 'Введите email вида name@mai.education');
                 isValid = false;
             }
 
@@ -282,12 +392,18 @@
                 if (result.success) {
                     showServerMessage('success', 'Вход выполнен успешно! Перенаправление...');
 
-                    // Сохраняем токен если есть
-                    if (result.token) {
-                        localStorage.setItem('auth_token', result.token);
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user_id', result.user_id);
+
+                    const params = new URLSearchParams(window.location.search);
+                    const nextPage = params.get('next');
+                    const tab = params.get('tab');
+
+                    if (nextPage) {
+                        window.location.href = nextPage;
+                    } else {
+                        window.location.href = '/profile';
                     }
-                    window.location.href = '/marketplace';
-                    
                 } else {
                     showServerMessage('error', result.error || 'Неверный email или пароль');
                 }
@@ -344,22 +460,87 @@
         }
 
         // Очистка ошибок при вводе
-        document.getElementById('email').addEventListener('input', function() {
+        document.getElementById('email').addEventListener('input', function () {
             this.classList.remove('error');
             document.getElementById('emailError').classList.remove('show');
         });
 
-        document.getElementById('password').addEventListener('input', function() {
+        document.getElementById('password').addEventListener('input', function () {
             this.classList.remove('error');
             document.getElementById('passwordError').classList.remove('show');
         });
 
         // Добавляем обработку Enter
-        document.getElementById('password').addEventListener('keypress', function(e) {
+        document.getElementById('password').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 document.getElementById('loginForm').dispatchEvent(new Event('submit'));
             }
         });
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoContainer = document.getElementById("logoContainer");
+            const letters = ["B", "A", "Z", "A", "R"];
+
+            let animationId;
+            let startTime;
+            let isVisible = false;
+
+            // Создание отдельных букв BAZAR
+            function initLetters() {
+                logoContainer.innerHTML = "";
+                letters.forEach((letter) => {
+                    const span = document.createElement("span");
+                    span.textContent = letter;
+                    span.className = "logo-letter";
+                    logoContainer.appendChild(span);
+                });
+            }
+
+            // Появление букв
+            function showLetters() {
+                const letterElements = document.querySelectorAll(".logo-letter");
+                letterElements.forEach((el, i) => {
+                    setTimeout(() => el.classList.add("visible"), i * 150);
+                });
+            }
+
+            // Волновой полёт (для 5 букв)
+            function animate(currentTime = performance.now()) {
+                if (!isVisible) return;
+
+                const elapsed = currentTime - startTime;
+                const letterElements = document.querySelectorAll(".logo-letter");
+
+                letters.forEach((_, i) => {
+                    if (letterElements[i]) {
+                        const xWave = Math.sin(elapsed * 0.0012 + i * 0.9) * (0.8 + i * 0.3);
+                        const yWave = Math.sin(elapsed * 0.0018 + i * 1.4) * (1.2 + i * 0.3);
+                        const scale = 1 + Math.sin(elapsed * 0.002 + i) * 0.05;
+                        letterElements[i].style.transform =
+                            `scale(${scale}) translate(${xWave}px, ${yWave}px)`;
+                    }
+                });
+
+                animationId = requestAnimationFrame(animate);
+            }
+
+            // Запуск
+            initLetters();
+
+            setTimeout(() => {
+                isVisible = true;
+                showLetters();
+                startTime = performance.now();
+                animate();
+            }, 800);
+
+            // Очистка
+            window.addEventListener("beforeunload", () => {
+                if (animationId) cancelAnimationFrame(animationId);
+            });
+        });
+    </script>
 </body>
+
 </html>

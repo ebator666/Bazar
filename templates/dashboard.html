@@ -18,33 +18,34 @@
             min-height: 100vh;
         }
 
-        /* Header */
+        /* Header — стекляный стиль, как в dashboard */
         .top-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: white;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(25px);
+            z-index: 1000;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             padding: 0 40px;
             height: 70px;
-            border-bottom: 1px solid #e5e5e5;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
         }
 
         .logo {
             font-size: 24px;
             font-weight: 700;
-            color: black;
+            color: #111;
             text-decoration: none;
         }
 
         .nav-links {
             display: flex;
-            gap: 30px;
+            gap: 24px;
             align-items: center;
         }
 
@@ -52,16 +53,11 @@
             text-decoration: none;
             color: #333;
             font-weight: 500;
-            transition: color 0.2s;
+            transition: 0.2s ease;
         }
 
         .nav-links a:hover {
-            color: black;
-        }
-
-        .nav-links a.active {
-            color: black;
-            font-weight: 600;
+            color: #111;
         }
 
         .header-actions {
@@ -317,6 +313,9 @@
             transition: all 0.2s;
             border: 1px solid #eee;
             cursor: pointer;
+            display: block;
+            text-decoration: none;
+            color: inherit;
         }
 
         .ad-card:hover {
@@ -403,6 +402,11 @@
             gap: 12px;
             border-top: 1px solid #eee;
             padding-top: 16px;
+        }
+
+        .ad-actions button {
+            position: relative;
+            z-index: 2;
         }
 
         .edit-btn,
@@ -684,6 +688,22 @@
             overflow: hidden;
             border: 2px solid #e0e0e0;
         }
+        .btn-primary {
+            padding: 8px 20px;
+            background: #111 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 16px !important;
+            font-size: 14px !important;
+            cursor: pointer;
+            transition: 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background: #2a2a2a !important;
+            transform: translateY(-1px);
+        }
 
         .existing-photo-item img {
             width: 100%;
@@ -706,6 +726,81 @@
             cursor: pointer;
             font-size: 14px;
             border: none;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        }
+
+        /* левый край — логотип BAZAR */
+        .top-header .logo-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .top-header .logo-left a {
+            text-decoration: none !important;
+            color: #111;
+            font-size: clamp(18px, 4.5vw, 26px);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        #logoContainer {
+            display: flex;
+            gap: 0.05em;
+            font-size: clamp(22px, 5.2vw, 32px);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-letter {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .logo-letter.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #logoLink {
+            text-decoration: none !important;
+            color: #111 !important;
+            cursor: default;
+            /* или pointer, если хочешь стрелку */
+        }
+
+        /* насильно убираем стандартные состояния :link/:visited */
+        #logoLink:link,
+        #logoLink:visited,
+        #logoLink:hover,
+        #logoLink:active {
+            text-decoration: none !important;
+            color: #111 !important;
+        }
+
+        /* можно чуть уменьшить отступ совсем без жира */
+        #logoLink {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
         }
 
         @media (max-width: 768px) {
@@ -746,14 +841,22 @@
 <body>
     <header>
         <div class="top-header">
-            <a href="/marketplace" class="logo">Bazar</a>
-            <div class="nav-links">
-                <a href="/marketplace" class="active">📱 Все объявления</a>
-                <a href="/dashboard">📦 Мои объявления</a>
+            <div class="logo-left">
+                <a href="/marketplace" id="logoLink" class="logo">
+                    <div id="logoContainer"></div>
+                </a>
             </div>
             <div class="header-actions">
-                <span class="user-name" id="userName">Загрузка...</span>
-                <button class="logout-btn" id="logoutBtn">Выйти</button>
+                <div class="nav-links">
+                <a href="/marketplace" class="btn-primary">Все объявления</a>
+                </div>
+                <a href="/profile" class="user-menu-link" id="userMenuContainer"
+                    style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;">
+                    <img src="https://via.placeholder.com/45" alt="Аватар" id="userAvatar" class="user-avatar"
+                        style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <span class="user-name" id="userName">Загрузка...</span>
+                </a>
+                <button onclick="logout()" class="logout-btn" id="logoutBtn">Выйти</button>
             </div>
         </div>
     </header>
@@ -792,12 +895,52 @@
                     <label>Категория *</label>
                     <select id="category">
                         <option value="">Выберите категорию</option>
-                        <option value="Электроника">📱 Электроника</option>
-                        <option value="Одежда">👕 Одежда</option>
-                        <option value="Недвижимость">🏠 Недвижимость</option>
-                        <option value="Авто">🚗 Авто</option>
-                        <option value="Услуги">💼 Услуги</option>
-                        <option value="Другое">📦 Другое</option>
+
+                        <optgroup label="🛍 Товары">
+                            <option value="Техника">📱 Техника</option>
+                            <option value="Одежда">👕 Одежда</option>
+                            <option value="Мебель">🛋 Мебель</option>
+                            <option value="Книги">📚 Книги</option>
+                            <option value="Другое">📦 Другое</option>
+                        </optgroup>
+
+                        <optgroup label="🏠 Жильё">
+                            <option value="Поиск соседей">👨‍👩‍👧‍👦 Поиск соседей</option>
+                            <option value="Аренда комнаты">🛏 Аренда комнаты</option>
+                        </optgroup>
+
+                        <optgroup label="💼 Услуги">
+                            <option value="Репетиторство">📚 Репетиторство</option>
+                            <option value="Программирование">💻 Программирование</option>
+                            <option value="Помощь с курсовыми">🎓 Помощь с курсовыми</option>
+                        </optgroup>
+
+                        <optgroup label="🔄 Обмен">
+                            <option value="Обмен вещами">🔄 Обмен вещами</option>
+                            <option value="Отдам даром">🎁 Отдам даром</option>
+                        </optgroup>
+
+                        <optgroup label="📖 Материалы для учебы">
+                            <option value="Конспекты">📝 Конспекты</option>
+                            <option value="Учебники">📚 Учебники</option>
+                            <option value="Подготовка к экзаменам">🧪 Подготовка к экзаменам</option>
+                        </optgroup>
+
+                        <optgroup label="💼 Работа / Подработка">
+                            <option value="Стажировки">👩‍💻 Стажировки</option>
+                            <option value="Волонтёрство">🌍 Волонтёрство</option>
+                            <option value="Вакансии">💰 Вакансии</option>
+                        </optgroup>
+
+                        <optgroup label="🚗 Транспорт">
+                            <option value="Авто">🚗 Авто</option>
+                            <option value="Велосипеды">🚲 Велосипеды</option>
+                        </optgroup>
+
+                        <optgroup label="🎉 События">
+                            <option value="Мероприятия">🎪 Мероприятия</option>
+                            <option value="Студклубы">👥 Студклубы</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="form-group">
@@ -836,7 +979,7 @@
     <div id="message" class="message hidden"></div>
 
     <script>
-        let token = localStorage.getItem('auth_token');
+        let token = localStorage.getItem('token');
         let currentUserId = null;
         let currentPhotos = [];
         let galleryPhotos = [];
@@ -845,8 +988,10 @@
 
         // Проверка авторизации
         async function checkAuth() {
+            const token = localStorage.getItem('token');
+
             if (!token) {
-                window.location.href = '/signin';
+                window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
                 return false;
             }
 
@@ -862,8 +1007,8 @@
                     await loadAds();
                     return true;
                 } else {
-                    localStorage.removeItem('auth_token');
-                    window.location.href = '/signin';
+                    localStorage.removeItem('token');
+                    window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
                     return false;
                 }
             } catch (error) {
@@ -883,6 +1028,31 @@
                 }
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
+            }
+        }
+
+        // Добавьте эту функцию в ваш <script>
+        async function loadHeaderProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/profile', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const userNameEl = document.getElementById('userName');
+                    const userAvatarEl = document.getElementById('userAvatar');
+
+                    if (userNameEl) userNameEl.textContent = data.name;
+                    if (userAvatarEl && data.profile_photo) {
+                        userAvatarEl.src = data.profile_photo + '?t=' + Date.now();
+                    }
+                }
+            } catch (e) {
+                console.error('Ошибка подгрузки профиля в хедер:', e);
             }
         }
 
@@ -912,7 +1082,7 @@
         // Загрузка объявлений пользователя
         async function loadAds() {
             try {
-                const response = await fetch('/api/ads', {
+                const response = await fetch('/api/user-ads', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
@@ -921,26 +1091,28 @@
 
                 if (data.success && data.ads && data.ads.length > 0) {
                     container.innerHTML = data.ads.map(ad => `
-                        <div class="ad-card" data-id="${ad.id}">
-                            <div class="ad-image" onclick="window.location.href='/ad/${ad.id}'">
-                                ${ad.first_photo ?
-                            `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">` :
-                            `<div class="no-image">📷</div>`
+                        <a href="/ad/${ad.id}" class="ad-card" data-id="${ad.id}">
+                            <div class="ad-image">
+                                ${ad.first_photo
+                            ? `<img src="${ad.first_photo}" alt="${escapeHtml(ad.title)}">`
+                            : `<div class="no-image">📷</div>`
                         }
-                            </div>
-                            <div class="ad-info">
-                                <span class="ad-category">${escapeHtml(ad.category)}</span>
-                                <h3 class="ad-title">${escapeHtml(ad.title)}</h3>
-                                <div class="ad-price">${formatPrice(ad.price)} ₽</div>
-                                <div class="ad-description">${escapeHtml(ad.description || 'Без описания')}</div>
-                                <div class="ad-date">📅 ${formatDate(ad.created_at)}</div>
-                                <div class="ad-actions">
-                                    <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${ad.id})">✏️ Редактировать</button>
-                                    <button class="delete-btn" onclick="event.stopPropagation(); deleteAd(${ad.id})">🗑️ Удалить</button>
-                                </div>
-                            </div>
+                    </div>
+                    <div class="ad-info">
+                        <span class="ad-category" data-category-name="${escapeHtml(ad.category_name || ad.category || 'Без категории')}">
+                        ${escapeHtml(ad.category_name || ad.category || 'Без категории')}
+                        </span>
+                        <h3 class="ad-title">${escapeHtml(ad.title)}</h3>
+                        <div class="ad-price">${formatPrice(ad.price)} ₽</div>
+                        <div class="ad-description">${escapeHtml(ad.description || 'Без описания')}</div>
+                        <div class="ad-date">📅 ${formatDate(ad.created_at)}</div>
+                        <div class="ad-actions">
+                            <button class="edit-btn" onclick="event.preventDefault(); event.stopPropagation(); openEditModal(${ad.id})">✏️ Редактировать</button>
+                            <button class="delete-btn" onclick="event.preventDefault(); event.stopPropagation(); deleteAd(${ad.id})">🗑️ Удалить</button>
                         </div>
-                    `).join('');
+                    </div>
+                </a>
+            `).join('');
                 } else {
                     container.innerHTML = `
                         <div class="empty-state">
@@ -955,10 +1127,12 @@
             }
         }
 
+
+
         // Создание объявления
         async function createAd(formData) {
             try {
-                const response = await fetch('/api/ads', {
+                const response = await fetch('/api/user-ads', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -1054,7 +1228,7 @@
         function saveAd() {
             const title = document.getElementById('title').value.trim();
             const price = document.getElementById('price').value;
-            const category = document.getElementById('category').value;
+            const categoryId = document.getElementById('category').value;  // Правильно
             const description = document.getElementById('description').value.trim();
             const adId = document.getElementById('adId').value;
 
@@ -1066,7 +1240,7 @@
                 showMessage('Введите корректную цену', 'error');
                 return;
             }
-            if (!category) {
+            if (!categoryId) {  // вместо if (!category)
                 showMessage('Выберите категорию', 'error');
                 return;
             }
@@ -1084,12 +1258,12 @@
             }
 
             if (adId && adId !== '') {
-                updateAd(parseInt(adId), { title, price: parseInt(price), category, description });
+                updateAd(parseInt(adId), { title, price: parseInt(price), category_id: categoryId, description });
             } else {
                 const formData = new FormData();
                 formData.append('title', title);
                 formData.append('price', price);
-                formData.append('category', category);
+                formData.append('category_id', categoryId);  // Backend ожидает category_id
                 formData.append('description', description);
 
                 // Добавляем только первые 5 фото
@@ -1171,10 +1345,9 @@
 
         async function openEditModal(adId) {
             clearPhotoLimitError();
-            currentAdId = adId;
+            document.getElementById('adId').value = adId;
 
             try {
-                // Загружаем существующие фото
                 const response = await fetch(`/api/ads/${adId}/photos`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -1186,27 +1359,42 @@
                     existingPhotos = [];
                 }
 
-                // Находим карточку объявления
                 const card = document.querySelector(`.ad-card[data-id="${adId}"]`);
 
                 if (card) {
                     const title = card.querySelector('.ad-title').textContent;
                     const priceText = card.querySelector('.ad-price').textContent;
-                    const price = parseInt(priceText.replace(' ₽', '').replace(/\s/g, ''));
-                    const category = card.querySelector('.ad-category').textContent;
+                    const price = parseInt(
+                        priceText.replace(' ₽', '').replace(/\s/g, '')
+                    );
+                    const categoryText = card.querySelector('.ad-category').textContent.trim();
                     const description = card.querySelector('.ad-description').textContent;
 
-                    document.getElementById('adId').value = adId;
-                    document.getElementById('modalTitle').textContent = 'Редактировать объявление';
                     document.getElementById('title').value = title;
                     document.getElementById('price').value = price;
-                    document.getElementById('category').value = category;
-                    document.getElementById('description').value = description === 'Без описания' ? '' : description;
 
-                    // Очищаем новые фото
+                    // Берём "category_name" из БД, как в get_user_ads
+                    const categoryName = card.querySelector('.ad-category').getAttribute('data-category-name') || categoryText;
+
+                    const select = document.getElementById('category');
+                    const options = select.querySelectorAll('option');
+
+                    let found = false;
+                    for (let option of options) {
+                        // option.value = "Техника", "Одежда" и т.п.
+                        if (option.value === categoryName) {
+                            select.value = categoryName;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        select.value = '';
+                    }
+
+                    document.getElementById('description').value = description;
+
                     currentPhotos = [];
-
-                    // Отображаем существующие фото
                     renderExistingPhotos();
                     updatePhotoPreview();
 
@@ -1234,7 +1422,7 @@
         }
 
         function logout() {
-            localStorage.removeItem('auth_token');
+            localStorage.removeItem('token');
             window.location.href = '/';
         }
 
@@ -1395,7 +1583,92 @@
             });
 
             checkAuth();
+            loadHeaderProfile();
         });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoContainer = document.getElementById("logoContainer");
+            const subtitle = document.getElementById("subtitle");
+            const letters = ["B", "A", "Z", "A", "R"];
+
+            let animationId;
+            let startTime;
+            let isVisible = false;
+
+            // Создание отдельных букв BAZAR
+            function initLetters() {
+                logoContainer.innerHTML = "";
+                letters.forEach((letter) => {
+                    const span = document.createElement("span");
+                    span.textContent = letter;
+                    span.className = "logo-letter";
+                    logoContainer.appendChild(span);
+                });
+            }
+
+            // Появление букв
+            function showLetters() {
+                const letterElements = document.querySelectorAll(".logo-letter");
+                letterElements.forEach((el, i) => {
+                    setTimeout(() => el.classList.add("visible"), i * 150);
+                });
+                setTimeout(() => subtitle.classList.add("visible"), 1200);
+            }
+
+            // Волновой полёт (для 5 букв)
+            function animate(currentTime = performance.now()) {
+                if (!isVisible) return;
+
+                const elapsed = currentTime - startTime;
+                const letterElements = document.querySelectorAll(".logo-letter");
+
+                letters.forEach((_, i) => {
+                    if (letterElements[i]) {
+                        const xWave = Math.sin(elapsed * 0.0012 + i * 0.9) * (0.8 + i * 0.3);
+                        const yWave = Math.sin(elapsed * 0.0018 + i * 1.4) * (1.2 + i * 0.3);
+                        const scale = 1 + Math.sin(elapsed * 0.002 + i) * 0.05; // дыхание
+                        letterElements[i].style.transform =
+                            `scale(${scale}) translate(${xWave}px, ${yWave}px)`;
+                    }
+                });
+
+                animationId = requestAnimationFrame(animate);
+            }
+
+            // Запуск анимации
+            initLetters();
+
+            setTimeout(() => {
+                isVisible = true;
+                showLetters();
+                startTime = performance.now();
+                animate();
+            }, 800);
+
+            // Очистка при выходе
+            window.addEventListener("beforeunload", () => {
+                if (animationId) cancelAnimationFrame(animationId);
+            });
+        });
+
+        // Если у тебя есть кнопка возврата (backButton) — можно оставить
+        const backButton = document.getElementById("backButton");
+
+        function initMenu() {
+            setTimeout(() => {
+                if (backButton) {
+                    backButton.style.opacity = "1";
+                    backButton.style.transform = "translateY(0)";
+                }
+            }, 400);
+        }
+
+        // Подсветка ссылки в подзаголовке (если есть subtitleLink)
+        setTimeout(() => {
+            const subtitleLink = document.getElementById("subtitleLink");
+            if (subtitleLink) subtitleLink.classList.add("visible");
+        }, 1200);
     </script>
 </body>
 
