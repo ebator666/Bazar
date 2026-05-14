@@ -341,15 +341,19 @@
 
                 if (!data.success) {
                     document.getElementById('adContent').innerHTML = `
-                    <div class="error">
-                        <p>❌ ${data.error || 'Объявление не найдено'}</p>
-                        <a href="/marketplace" style="color: black; margin-top: 20px; display: inline-block;">Вернуться к объявлениям</a>
-                    </div>
-                `;
+        <div class="error">
+          <p>❌ ${data.error || 'Объявление не найдено'}</p>
+          <a href="/marketplace" style="color: black; margin-top: 20px; display: inline-block;">Вернуться к объявлениям</a>
+        </div>
+      `;
                     return;
                 }
 
                 const ad = data.ad;
+                console.log("Поля объявления:", Object.keys(ad));
+                console.log("seller_name:", ad.seller_name, "seller_email:", ad.seller_email);
+                console.log("data.ad", data.ad);   // ✅
+
                 document.title = `${ad.title} | Bazar`;
 
                 let galleryHtml = '';
@@ -358,57 +362,57 @@
                 if (ad.photos && ad.photos.length > 0) {
                     mainPhotoHtml = `<img id="mainImage" src="${ad.photos[0].url}" alt="${escapeHtml(ad.title)}">`;
                     galleryHtml = ad.photos.map((photo, index) => `
-                    <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changePhoto('${photo.url}', ${index})">
-                        <img src="${photo.url}" alt="Фото ${index + 1}">
-                    </div>
-                `).join('');
+        <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changePhoto('${photo.url}', ${index})">
+          <img src="${photo.url}" alt="Фото ${index + 1}">
+        </div>
+      `).join('');
                 } else {
                     mainPhotoHtml = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:48px;">📷</div>`;
                 }
 
                 const html = `
-                <div class="ad-detail">
-                    <div class="gallery-section">
-                        <div class="main-photo">
-                            ${mainPhotoHtml}
-                        </div>
-                        ${ad.photos && ad.photos.length > 1 ? `
-                            <div class="thumbnails">
-                                ${galleryHtml}
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div class="info-section">
-                        <span class="category-badge">${escapeHtml(ad.category_name || ad.category || 'Без категории')}</span>
-                        <h1 class="ad-title">${escapeHtml(ad.title)}</h1>
-                        <div class="ad-price">${formatPrice(ad.price)} ₽</div>
-                        <div class="ad-description">${escapeHtml(ad.description || 'Нет описания')}</div>
+      <div class="ad-detail">
+        <div class="gallery-section">
+          <div class="main-photo">
+            ${mainPhotoHtml}
+          </div>
+          ${ad.photos && ad.photos.length > 1 ? `
+            <div class="thumbnails">
+              ${galleryHtml}
+            </div>
+          ` : ''}
+        </div>
+        <div class="info-section">
+          <span class="category-badge">${escapeHtml(ad.category_name || ad.category || 'Без категории')}</span>
+          <h1 class="ad-title">${escapeHtml(ad.title)}</h1>
+          <div class="ad-price">${formatPrice(ad.price)} ₽</div>
+          <div class="ad-description">${escapeHtml(ad.description || 'Нет описания')}</div>
 
-                        <div class="seller-info">
-                            <h3>📢 Продавец</h3>
-                            <div class="seller-name">${escapeHtml(ad.seller_name)}</div>
-                            <div class="seller-contact">
-                                📧 ${escapeHtml(ad.seller_email)}<br>
-                                📍 ${escapeHtml(ad.seller_geolocation || 'Не указано')}
-                            </div>
-                        </div>
+          <div class="seller-info">
+            <h3>📢 Продавец</h3>
+            <div class="seller-name">${escapeHtml(ad.seller_name || 'Аноним')}</div>
+            <div class="seller-contact">
+              📧 ${escapeHtml(ad.seller_email || 'Нет email')}<br>
+              📍 ${escapeHtml(ad.seller_geolocation || 'Не указано')}
+            </div>
+          </div>
 
-                        <div class="ad-date">
-                            📅 Опубликовано: ${formatDate(ad.created_at)}
-                        </div>
-                    </div>
-                </div>
-            `;
+          <div class="ad-date">
+            📅 Опубликовано: ${formatDate(ad.created_at)}
+          </div>
+        </div>
+      </div>
+    `;
 
                 document.getElementById('adContent').innerHTML = html;
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('Ошибка загрузки:', error);
                 document.getElementById('adContent').innerHTML = `
-                <div class="error">
-                    <p>❌ Ошибка загрузки объявления</p>
-                    <a href="/marketplace" style="color: black; margin-top: 20px; display: inline-block;">Вернуться к объявлениям</a>
-                </div>
-            `;
+      <div class="error">
+        <p>❌ Ошибка загрузки объявления</p>
+        <a href="/marketplace" style="color: black; margin-top: 20px; display: inline-block;">Вернуться к объявлениям</a>
+      </div>
+    `;
             }
         }
 

@@ -103,12 +103,12 @@ def get_ad_detail_route(ad_id):
                 'title': ad[1],
                 'price': ad[2],
                 'description': ad[3],
-                'category': ad[4],
-                'seller_id': ad[5],
-                'seller_name': ad[6],
-                'seller_email': ad[7],
-                'seller_geolocation': ad[8],
-                'created_at': ad[9],
+                'category': ad[5],
+                'seller_id': ad[8],
+                'seller_name': ad[9],
+                'seller_email': ad[10],
+                'seller_geolocation': ad[11],   # теперь это dormitory
+                'created_at': ad[12],
                 'photos': photo_list
             }
         })
@@ -234,36 +234,50 @@ def create_ad_route():
 @app.route('/api/ads/<int:ad_id>', methods=['PUT'])
 def update_ad_route(ad_id):
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
-    
+
     if not token:
         return jsonify({'success': False, 'error': 'Не авторизован'}), 401
-    
+
     user_data = get_user_token(token)
     if not user_data:
         return jsonify({'success': False, 'error': 'Сессия истекла'}), 401
-    
+
     ad = get_ad_by_id(ad_id)
     if not ad or ad[1] != user_data[0]:
         return jsonify({'success': False, 'error': 'Объявление не найдено'}), 404
-    
+
     data = request.json
     title = data.get('title', '').strip()
     price = data.get('price')
-    category = data.get('category_id', '').strip()
+    category = data.get('category_id', '').strip()  # строка, например 'Техника'
     description = data.get('description', '').strip()
-    
+
     if not title or len(title) < 3:
         return jsonify({'success': False, 'error': 'Название должно быть минимум 3 символа'}), 400
-    
+
     if not price or not str(price).isdigit() or int(price) <= 0:
         return jsonify({'success': False, 'error': 'Введите корректную цену'}), 400
-    
+
     if not category:
         return jsonify({'success': False, 'error': 'Выберите категорию'}), 400
-    
-    if update_ad(ad_id, title, int(price), description, category):
+
+    # ✅ Из строки в численный category_id
+    try:
+        with sqlite3.connect('test.db') as con:
+            cur = con.cursor()
+            cur.execute("SELECT id FROM categories WHERE name = ?", (category,))
+            row = cur.fetchone()
+            if not row:
+                return jsonify({'success': False, 'error': 'Неизвестная категория'}), 400
+            category_id = row[0]
+    except Exception as e:
+        print(f"Ошибка получения категории: {e}")
+        return jsonify({'success': False, 'error': 'Ошибка сервера'}), 500
+
+    # Теперь передаём число
+    if update_ad(ad_id, title, int(price), description, category_id):
         return jsonify({'success': True, 'message': 'Объявление обновлено!'})
-    
+
     return jsonify({'success': False, 'error': 'Ошибка при обновлении'}), 500
 
 # Удаление объявления

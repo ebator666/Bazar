@@ -1084,7 +1084,9 @@
                         }
                     </div>
                     <div class="ad-info">
-                        <span class="ad-category">${escapeHtml(ad.category_name || ad.category || 'Без категории')}</span>
+                        <span class="ad-category" data-category-name="${escapeHtml(ad.category_name || ad.category || 'Без категории')}">
+                        ${escapeHtml(ad.category_name || ad.category || 'Без категории')}
+                        </span>
                         <h3 class="ad-title">${escapeHtml(ad.title)}</h3>
                         <div class="ad-price">${formatPrice(ad.price)} ₽</div>
                         <div class="ad-description">${escapeHtml(ad.description || 'Без описания')}</div>
@@ -1328,10 +1330,9 @@
 
         async function openEditModal(adId) {
             clearPhotoLimitError();
-            document.getElementById('adId').value = adId;  // используем существующий input
+            document.getElementById('adId').value = adId;
 
             try {
-                // Загружаем существующие фото
                 const response = await fetch(`/api/ads/${adId}/photos`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -1343,25 +1344,42 @@
                     existingPhotos = [];
                 }
 
-                // Находим карточку объявления
                 const card = document.querySelector(`.ad-card[data-id="${adId}"]`);
 
                 if (card) {
                     const title = card.querySelector('.ad-title').textContent;
                     const priceText = card.querySelector('.ad-price').textContent;
-                    const price = parseInt(priceText.replace(' ₽', '').replace(/\s/g, ''));
+                    const price = parseInt(
+                        priceText.replace(' ₽', '').replace(/\s/g, '')
+                    );
                     const categoryText = card.querySelector('.ad-category').textContent.trim();
                     const description = card.querySelector('.ad-description').textContent;
 
-                    document.getElementById('title').value = card?.querySelector('.ad-title')?.textContent || '';
-                    document.getElementById('price').value = parseInt(card?.querySelector('.ad-price')?.textContent.replace(/[^0-9]/g, '') || 0);
-                    document.getElementById('category').value = card?.querySelector('.ad-category')?.textContent.trim() || '';
-                    document.getElementById('description').value = card?.querySelector('.ad-description')?.textContent.replace('...', '') || '';
+                    document.getElementById('title').value = title;
+                    document.getElementById('price').value = price;
 
-                    // Очищаем новые фото
+                    // Берём "category_name" из БД, как в get_user_ads
+                    const categoryName = card.querySelector('.ad-category').getAttribute('data-category-name') || categoryText;
+
+                    const select = document.getElementById('category');
+                    const options = select.querySelectorAll('option');
+
+                    let found = false;
+                    for (let option of options) {
+                        // option.value = "Техника", "Одежда" и т.п.
+                        if (option.value === categoryName) {
+                            select.value = categoryName;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        select.value = '';
+                    }
+
+                    document.getElementById('description').value = description;
+
                     currentPhotos = [];
-
-                    // Отображаем существующие фото
                     renderExistingPhotos();
                     updatePhotoPreview();
 

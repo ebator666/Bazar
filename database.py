@@ -375,7 +375,7 @@ def get_ad_with_seller(ad_id):
                     a.seller_id,
                     u.user_nickname,
                     u.email,
-                    u.user_geolocation,
+                    u.dormitory,                       
                     COALESCE(a.created_at, datetime('now')) AS created_at
                 FROM ads a
                 JOIN users u ON a.seller_id = u.user_id
