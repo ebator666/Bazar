@@ -797,7 +797,21 @@
         </div>
     </main>
 
-    <script> document.addEventListener("DOMContentLoaded", () => {
+    <script> // БЛОКИРОВКА ДО ЗАГРУЗКИ (критично!)
+        if (!localStorage.getItem('token')) {
+            window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+        }
+
+        // Защита от bfcache
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || !localStorage.getItem('token')) {
+                localStorage.removeItem('token');
+                sessionStorage.clear();
+                window.location.replace('/signin');
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
             const editToggle = document.getElementById("editToggle");
             const saveBtn = document.getElementById("saveBtn");
             const cancelBtn = document.getElementById("cancelBtn");
@@ -948,44 +962,54 @@
 
                 return { photoInput, uploadBtn, previewDiv };
             }
+
+
             async function checkAuth() {
                 const token = localStorage.getItem('token');
 
                 if (!token) {
-                    window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+                    localStorage.removeItem('token');
+                    sessionStorage.clear();
+                    window.location.replace('/signin');
                     return false;
                 }
 
                 try {
                     const response = await fetch('/check-auth', {
-                        headers: { 'Authorization': 'Bearer ' + token }
+                        method: 'POST', // Важно! GET может кэшироваться
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Cache-Control': 'no-cache'
+                        },
+                        cache: 'no-store' // Максимальная защита от кэша
                     });
+
                     const data = await response.json();
 
-                    if (data.authenticated) {
-                        currentUserId = data.user_id;
-                        await loadProfileData(currentUserId);   // если у тебя есть такая функция
-                        return true;
-                    } else {
+                    if (!data.authenticated) {
                         localStorage.removeItem('token');
-                        window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+                        sessionStorage.clear();
+                        window.location.replace('/signin');
                         return false;
                     }
+
+                    currentUserId = data.user_id;
+                    await loadProfileData(currentUserId);
+                    return true;
+
                 } catch (error) {
-                    console.error('Ошибка проверки в профиле:', error);
+                    localStorage.removeItem('token');
+                    sessionStorage.clear();
+                    window.location.replace('/signin');
                     return false;
                 }
             }
 
-            // Вызови проверку при загрузке страницы
-            document.addEventListener('DOMContentLoaded', () => {
-                checkAuth();
-            });
             async function loadProfile() {
                 try {
                     const token = localStorage.getItem("token");
                     if (!token) {
-                        window.location.href = "/signin";
+                        window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
                         return;
                     }
 
@@ -1038,13 +1062,12 @@
                 }
             }
 
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = '/signin';
-            }
 
             // Загрузка объявлений в профиле
             async function loadUserAds() {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
                 const container = document.querySelector('.ads-list');
                 const emptyBlock = document.querySelector('.ads-empty');
 
@@ -1105,13 +1128,23 @@
                 return div.innerHTML;
             }
 
-            // Запускаем загрузку объявлений
-            loadUserAds();
 
             function logout(event) {
                 event.preventDefault();
+
+                // Максимальная очистка
                 localStorage.removeItem('token');
-                window.location.href = '/signin';   // или '/signin?next=/marketplace', если нужно
+                sessionStorage.clear();
+
+                // События для инвалидации bfcache
+                window.onpageshow = null;
+                window.onpagehide = function () {
+                    // Отправляем сигнал для инвалидации кэша
+                    localStorage.setItem('logout', 'true');
+                };
+
+                // Редирект с принудительной инвалидацией
+                window.location.href = '/signin?' + Date.now();
             }
 
             //  Инициализируем фото
@@ -1170,7 +1203,7 @@
                     editToggle.style.display = "block";
                     photoElements.uploadBtn.style.display = "none";
 
-                    // ⚠️ ОБЯЗАТЕЛЬНО
+                    //  ОБЯЗАТЕЛЬНО
                     await loadProfile();  // чтобы после сохранения БД UI подтянул актуальные age, direction, и т.д.
 
                     if (currentPhotoFile) {
@@ -1205,8 +1238,8 @@
                     alert("Ошибка сохранения: " + error.message);
                 }
             });
-
             loadProfile();
+            loadUserAds();
         });
     </script>
     <script>document.addEventListener("DOMContentLoaded", () => {
