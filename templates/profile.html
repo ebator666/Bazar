@@ -960,48 +960,36 @@
                 return { photoInput, uploadBtn, previewDiv };
             }
 
-
             async function checkAuth() {
-                const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token');
 
-                if (!token) {
-                    localStorage.removeItem('token');
-                    sessionStorage.clear();
-                    window.location.replace('/signin');
-                    return false;
-                }
-
-                try {
-                    const response = await fetch('/check-auth', {
-                        method: 'POST', // Важно! GET может кэшироваться
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Cache-Control': 'no-cache'
-                        },
-                        cache: 'no-store' // Максимальная защита от кэша
-                    });
-
-                    const data = await response.json();
-
-                    if (!data.authenticated) {
-                        localStorage.removeItem('token');
-                        sessionStorage.clear();
-                        window.location.replace('/signin');
-                        return false;
-                    }
-
-                    currentUserId = data.user_id;
-                    await loadProfileData(currentUserId);
-                    return true;
-
-                } catch (error) {
-                    localStorage.removeItem('token');
-                    sessionStorage.clear();
-                    window.location.replace('/signin');
-                    return false;
-                }
+            // 1. Если токена вообще нет — сразу отправляем на авторизацию с сохранением пути
+            if (!token) {
+                window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+                return;
             }
 
+            try {
+                // 2. Проверяем токен на сервере
+                const response = await fetch('/check-auth', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+
+                // 3. Если сервер сказал, что токен невалидный — редирект
+                if (!data.authenticated) {
+                    localStorage.removeItem('token');
+                    window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+                }
+                }
+            catch (error) {
+                // 4. Если упала сеть или сервер лёг — тоже редирект (или обработка ошибки)
+                console.error('Ошибка проверки авторизации:', error);
+                window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+            }
+        }
+
+            
             async function loadProfile() {
                 try {
                     const token = localStorage.getItem("token");
@@ -1009,22 +997,17 @@
                         window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
                         return;
                     }
-
                     const authRes = await fetch("/check-auth", {
                         headers: { "Authorization": `Bearer ${token}` },
                     });
                     if (!authRes.ok) throw new Error("Не авторизован");
-
                     const authData = await authRes.json();
                     const user_id = authData.user_id;
-
-                    // ✅ УБИРАЕМ /user/${user_id} — используем только /api/profile!
                     const profileApiRes = await fetch("/api/profile", {
                         headers: { "Authorization": `Bearer ${token}` },
                     });
                     const profileApiData = await profileApiRes.json();
                     if (!profileApiData.success) throw new Error("Ошибка получения профиля");
-
                     const safeData = {
                         name: profileApiData.name || "",
                         email: profileApiData.email || "",
@@ -1037,9 +1020,7 @@
                         userId: profileApiData.user_id || user_id,
                         profile_photo: profileApiData.profile_photo || null,  // ✅ Из /api/profile
                     };
-
                     console.log("✅ safeData из /api/profile:", safeData);
-
                     // ✅ ФИКС: Устанавливаем аватар ИЗ БД ПЕРЕД setViewData
                     const profileAvatar = document.querySelector(".profile-avatar");
                     if (safeData.profile_photo && profileAvatar) {
@@ -1131,7 +1112,6 @@
 
                 // Максимальная очистка
                 localStorage.removeItem('token');
-                sessionStorage.clear();
 
                 // События для инвалидации bfcache
                 window.onpageshow = null;
@@ -1165,7 +1145,7 @@
 
             saveBtn.addEventListener("click", async () => {
                 const token = localStorage.getItem("token");
-                if (!token) return window.location.href = "/signin";
+                if (!token) return window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
 
                 const newData = getFormData();
 

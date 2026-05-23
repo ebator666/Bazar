@@ -688,6 +688,7 @@
             overflow: hidden;
             border: 2px solid #e0e0e0;
         }
+
         .btn-primary {
             padding: 8px 20px;
             background: #111 !important;
@@ -848,7 +849,7 @@
             </div>
             <div class="header-actions">
                 <div class="nav-links">
-                <a href="/marketplace" class="btn-primary">Все объявления</a>
+                    <a href="/marketplace" class="btn-primary">Все объявления</a>
                 </div>
                 <a href="/profile" class="user-menu-link" id="userMenuContainer"
                     style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;">
@@ -986,34 +987,36 @@
         let galleryIndex = 0;
         let existingPhotos = [];
 
-        // Проверка авторизации
         async function checkAuth() {
             const token = localStorage.getItem('token');
 
+            // 1. Если токена вообще нет — сразу отправляем на авторизацию с сохранением пути
             if (!token) {
                 window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
-                return false;
+                return;
             }
 
             try {
+                // 2. Проверяем токен на сервере
                 const response = await fetch('/check-auth', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
 
-                if (data.authenticated) {
-                    currentUserId = data.user_id;
-                    await loadUserData(currentUserId);
-                    await loadAds();
-                    return true;
-                } else {
+                // 3. Если сервер сказал, что токен невалидный — редирект
+                if (!data.authenticated) {
                     localStorage.removeItem('token');
                     window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
-                    return false;
                 }
-            } catch (error) {
-                console.error('Ошибка проверки:', error);
-                return false;
+                if (data.authenticated) {
+                    await loadUserData(data.user_id);
+                    await loadAds();
+                    return true;
+                }}
+            catch (error) {
+                // 4. Если упала сеть или сервер лёг — тоже редирект (или обработка ошибки)
+                console.error('Ошибка проверки авторизации:', error);
+                window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
             }
         }
 
@@ -1031,7 +1034,6 @@
             }
         }
 
-        // Добавьте эту функцию в ваш <script>
         async function loadHeaderProfile() {
             const token = localStorage.getItem('token');
             if (!token) return;
@@ -1164,37 +1166,30 @@
                     },
                     body: JSON.stringify(formData)
                 });
-
                 const result = await response.json();
-
                 if (!result.success) {
                     showMessage(result.error, 'error');
                     return;
                 }
-
                 // Если есть новые фото, загружаем их
                 if (currentPhotos.length > 0) {
                     const photoFormData = new FormData();
                     currentPhotos.forEach(file => {
                         photoFormData.append('photos', file);
                     });
-
                     const photoResponse = await fetch(`/api/ads/${adId}/photos`, {
                         method: 'POST',
                         headers: { 'Authorization': 'Bearer ' + token },
                         body: photoFormData
                     });
-
                     const photoResult = await photoResponse.json();
                     if (!photoResult.success) {
                         showMessage('Объявление обновлено, но фото не загрузились', 'error');
                     }
                 }
-
                 showMessage('Объявление обновлено!', 'success');
                 closeModal();
                 await loadAds();
-
             } catch (error) {
                 console.error('Ошибка обновления:', error);
                 showMessage('Ошибка при обновлении', 'error');
@@ -1228,10 +1223,9 @@
         function saveAd() {
             const title = document.getElementById('title').value.trim();
             const price = document.getElementById('price').value;
-            const categoryId = document.getElementById('category').value;  // Правильно
+            const categoryId = document.getElementById('category').value; 
             const description = document.getElementById('description').value.trim();
             const adId = document.getElementById('adId').value;
-
             if (!title) {
                 showMessage('Введите название', 'error');
                 return;
@@ -1244,19 +1238,16 @@
                 showMessage('Выберите категорию', 'error');
                 return;
             }
-
             // Проверка лимита фото для нового объявления
             if (!adId && currentPhotos.length > 5) {
                 showMessage('Максимум 5 фотографий на объявление', 'error');
                 return;
             }
-
             // Проверка лимита для редактирования
             if (adId && (existingPhotos.length + currentPhotos.length) > 5) {
                 showMessage(`Максимум 5 фотографий. Сейчас: ${existingPhotos.length} существующих + ${currentPhotos.length} новых = ${existingPhotos.length + currentPhotos.length}`, 'error');
                 return;
             }
-
             if (adId && adId !== '') {
                 updateAd(parseInt(adId), { title, price: parseInt(price), category_id: categoryId, description });
             } else {
@@ -1265,13 +1256,11 @@
                 formData.append('price', price);
                 formData.append('category_id', categoryId);  // Backend ожидает category_id
                 formData.append('description', description);
-
                 // Добавляем только первые 5 фото
                 const photosToAdd = currentPhotos.slice(0, 5);
                 photosToAdd.forEach(file => {
                     formData.append('photos', file);
                 });
-
                 createAd(formData);
             }
         }
@@ -1497,7 +1486,6 @@
             }, 3000);
         }
 
-        // Функция очистки ошибок лимита фото
         // Функция очистки всех ошибок и предупреждений о лимите
         function clearPhotoLimitError() {
             // Удаляем сообщения с классом photo-limit-warning

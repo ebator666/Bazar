@@ -291,9 +291,9 @@
             <div class="nav-links">
                 <a href="/marketplace">Главная</a>
                 <div id="authSection">
-                    <div class="auth-buttons">
-                        <a href="/signin" class="btn-outline">Войти</a>
-                        <a href="/" class="btn-primary">Регистрация</a>
+                    <div class="user-menu">
+                        <a href="/dashboard" class="btn-primary">Мои объявления</a>
+                        <button onclick="logout()" class="btn-outline">Выйти</button>
                     </div>
                 </div>
             </div>
@@ -452,29 +452,30 @@
 
         async function checkAuth() {
             const token = localStorage.getItem('token');
-            if (!token) return;
+
+            // 1. Если токена вообще нет — сразу отправляем на авторизацию с сохранением пути
+            if (!token) {
+                window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
+                return;
+            }
 
             try {
+                // 2. Проверяем токен на сервере
                 const response = await fetch('/check-auth', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await response.json();
 
-                if (data.authenticated) {
-                    const authSection = document.getElementById('authSection');
-                    if (authSection) {
-                        authSection.innerHTML = `
-                        <div class="user-menu">
-                            <a href="/dashboard" class="btn-primary">Мои объявления</a>
-                            <button onclick="logout()" class="btn-outline">Выйти</button>
-                        </div>
-                    `;
-                    }
-                } else {
+                // 3. Если сервер сказал, что токен невалидный — редирект
+                if (!data.authenticated) {
                     localStorage.removeItem('token');
+                    window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
                 }
-            } catch (e) {
-                console.log('Ошибка проверки авторизации', e);
+                }
+            catch (error) {
+                // 4. Если упала сеть или сервер лёг — тоже редирект (или обработка ошибки)
+                console.error('Ошибка проверки авторизации:', error);
+                window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
             }
         }
 
